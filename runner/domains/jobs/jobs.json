@@ -1,0 +1,47 @@
+{
+    "name": "jobs",
+    "issuesValues": {
+        "salary": {
+            "values": [
+                "2000",
+                "2500",
+                "3000",
+                "3500",
+                "4000"
+            ]
+        },
+        "fte": {
+            "values": [
+                "0.6",
+                "0.8",
+                "1.0"
+            ]
+        },
+        "work from home": {
+            "values": [
+                "0",
+                "1",
+                "2"
+            ]
+        },
+        "lease car": {
+            "values": [
+                "yes",
+                "no"
+            ]
+        },
+        "permanent contract": {
+            "values": [
+                "yes",
+                "no"
+            ]
+        },
+        "career development opportunities": {
+            "values": [
+                "low",
+                "medium",
+                "high"
+            ]
+        }
+    }
+}
