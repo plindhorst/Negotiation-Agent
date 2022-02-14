@@ -1,0 +1,10 @@
+{
+  "num_offers": 3,
+  "agent_1": "RandomAgent",
+  "utility_1": 0.7869661331,
+  "agent_2": "Group58_NegotiationAssignment_Agent",
+  "utility_2": 0.4454920789,
+  "nash_product": 0.35058717865861305,
+  "social_welfare": 1.232458212,
+  "result": "agreement"
+}

@@ -1,0 +1,165 @@
+{
+  "LinearAdditiveUtilitySpace": {
+    "issueUtilities": {
+      "issueA": {
+        "DiscreteValueSetUtilities": {
+          "valueUtilities": {
+            "valueA": 0.19109,
+            "valueB": 1.0,
+            "valueC": 0.5291,
+            "valueD": 0.23356,
+            "valueE": 0.01114,
+            "valueF": 0.21987,
+            "valueG": 0.40883,
+            "valueH": 0.50811,
+            "valueI": 0.12829,
+            "valueJ": 0.42474,
+            "valueK": 0.40195,
+            "valueL": 0.75168,
+            "valueM": 0.60493,
+            "valueN": 0.28545,
+            "valueO": 0.03787,
+            "valueP": 0.41277,
+            "valueQ": 0.27061,
+            "valueR": 0.06017,
+            "valueS": 0.23856,
+            "valueT": 0.26217,
+            "valueU": 0.14805,
+            "valueV": 0.09657,
+            "valueW": 0.21511,
+            "valueX": 0.0282,
+            "valueY": 0.27291,
+            "valueZ": 0.45515
+          }
+        }
+      },
+      "issueB": {
+        "DiscreteValueSetUtilities": {
+          "valueUtilities": {
+            "valueA": 0.09483,
+            "valueB": 0.02711,
+            "valueC": 0.21489,
+            "valueD": 0.12585,
+            "valueE": 0.04006,
+            "valueF": 1.0,
+            "valueG": 0.15621,
+            "valueH": 0.0234,
+            "valueI": 0.06461,
+            "valueJ": 0.56974,
+            "valueK": 0.60839,
+            "valueL": 0.09598,
+            "valueM": 0.1185,
+            "valueN": 0.32894,
+            "valueO": 0.74409,
+            "valueP": 0.23242,
+            "valueQ": 0.42142,
+            "valueR": 0.18588,
+            "valueS": 0.3622,
+            "valueT": 0.19823,
+            "valueU": 0.17496,
+            "valueV": 0.1326,
+            "valueW": 0.2735,
+            "valueX": 0.05355,
+            "valueY": 0.25252,
+            "valueZ": 0.24403
+          }
+        }
+      },
+      "issueC": {
+        "DiscreteValueSetUtilities": {
+          "valueUtilities": {
+            "valueA": 1.0,
+            "valueB": 0.83108,
+            "valueC": 0.33908,
+            "valueD": 0.04523,
+            "valueE": 0.37073,
+            "valueF": 0.69372,
+            "valueG": 0.01019
+          }
+        }
+      }
+    },
+    "issueWeights": {
+      "issueA": 0.144,
+      "issueB": 0.1049,
+      "issueC": 0.7511
+    },
+    "domain": {
+      "name": "domain01",
+      "issuesValues": {
+        "issueA": {
+          "values": [
+            "valueA",
+            "valueB",
+            "valueC",
+            "valueD",
+            "valueE",
+            "valueF",
+            "valueG",
+            "valueH",
+            "valueI",
+            "valueJ",
+            "valueK",
+            "valueL",
+            "valueM",
+            "valueN",
+            "valueO",
+            "valueP",
+            "valueQ",
+            "valueR",
+            "valueS",
+            "valueT",
+            "valueU",
+            "valueV",
+            "valueW",
+            "valueX",
+            "valueY",
+            "valueZ"
+          ]
+        },
+        "issueB": {
+          "values": [
+            "valueA",
+            "valueB",
+            "valueC",
+            "valueD",
+            "valueE",
+            "valueF",
+            "valueG",
+            "valueH",
+            "valueI",
+            "valueJ",
+            "valueK",
+            "valueL",
+            "valueM",
+            "valueN",
+            "valueO",
+            "valueP",
+            "valueQ",
+            "valueR",
+            "valueS",
+            "valueT",
+            "valueU",
+            "valueV",
+            "valueW",
+            "valueX",
+            "valueY",
+            "valueZ"
+          ]
+        },
+        "issueC": {
+          "values": [
+            "valueA",
+            "valueB",
+            "valueC",
+            "valueD",
+            "valueE",
+            "valueF",
+            "valueG"
+          ]
+        }
+      }
+    },
+    "name": "profileA"
+  }
+}

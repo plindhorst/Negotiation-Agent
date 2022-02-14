@@ -1,0 +1,165 @@
+{
+  "LinearAdditiveUtilitySpace": {
+    "issueUtilities": {
+      "issueA": {
+        "DiscreteValueSetUtilities": {
+          "valueUtilities": {
+            "valueA": 0.12106,
+            "valueB": 0.31675,
+            "valueC": 0.30647,
+            "valueD": 0.00328,
+            "valueE": 0.24322,
+            "valueF": 0.15923,
+            "valueG": 0.29247,
+            "valueH": 0.2078,
+            "valueI": 0.09483,
+            "valueJ": 0.38249,
+            "valueK": 0.0748,
+            "valueL": 0.24858,
+            "valueM": 0.01126,
+            "valueN": 0.52139,
+            "valueO": 0.00626,
+            "valueP": 1.0,
+            "valueQ": 0.14979,
+            "valueR": 0.20871,
+            "valueS": 0.03579,
+            "valueT": 0.13098,
+            "valueU": 0.07675,
+            "valueV": 0.22137,
+            "valueW": 0.27871,
+            "valueX": 0.0552,
+            "valueY": 0.80814,
+            "valueZ": 0.13062
+          }
+        }
+      },
+      "issueB": {
+        "DiscreteValueSetUtilities": {
+          "valueUtilities": {
+            "valueA": 0.16761,
+            "valueB": 0.03256,
+            "valueC": 0.42878,
+            "valueD": 0.0385,
+            "valueE": 0.63985,
+            "valueF": 0.58524,
+            "valueG": 0.18929,
+            "valueH": 0.1704,
+            "valueI": 0.6986,
+            "valueJ": 0.2215,
+            "valueK": 0.14439,
+            "valueL": 0.17264,
+            "valueM": 0.47971,
+            "valueN": 0.17408,
+            "valueO": 0.22375,
+            "valueP": 0.01124,
+            "valueQ": 0.68187,
+            "valueR": 0.32757,
+            "valueS": 1.0,
+            "valueT": 0.07296,
+            "valueU": 0.24966,
+            "valueV": 0.23895,
+            "valueW": 0.35861,
+            "valueX": 0.54161,
+            "valueY": 0.49644,
+            "valueZ": 0.64975
+          }
+        }
+      },
+      "issueC": {
+        "DiscreteValueSetUtilities": {
+          "valueUtilities": {
+            "valueA": 0.32806,
+            "valueB": 0.28416,
+            "valueC": 0.00662,
+            "valueD": 0.37419,
+            "valueE": 0.09563,
+            "valueF": 1.0,
+            "valueG": 0.01962
+          }
+        }
+      }
+    },
+    "issueWeights": {
+      "issueA": 0.75534,
+      "issueB": 0.14643,
+      "issueC": 0.09823
+    },
+    "domain": {
+      "name": "domain01",
+      "issuesValues": {
+        "issueA": {
+          "values": [
+            "valueA",
+            "valueB",
+            "valueC",
+            "valueD",
+            "valueE",
+            "valueF",
+            "valueG",
+            "valueH",
+            "valueI",
+            "valueJ",
+            "valueK",
+            "valueL",
+            "valueM",
+            "valueN",
+            "valueO",
+            "valueP",
+            "valueQ",
+            "valueR",
+            "valueS",
+            "valueT",
+            "valueU",
+            "valueV",
+            "valueW",
+            "valueX",
+            "valueY",
+            "valueZ"
+          ]
+        },
+        "issueB": {
+          "values": [
+            "valueA",
+            "valueB",
+            "valueC",
+            "valueD",
+            "valueE",
+            "valueF",
+            "valueG",
+            "valueH",
+            "valueI",
+            "valueJ",
+            "valueK",
+            "valueL",
+            "valueM",
+            "valueN",
+            "valueO",
+            "valueP",
+            "valueQ",
+            "valueR",
+            "valueS",
+            "valueT",
+            "valueU",
+            "valueV",
+            "valueW",
+            "valueX",
+            "valueY",
+            "valueZ"
+          ]
+        },
+        "issueC": {
+          "values": [
+            "valueA",
+            "valueB",
+            "valueC",
+            "valueD",
+            "valueE",
+            "valueF",
+            "valueG"
+          ]
+        }
+      }
+    },
+    "name": "profileB"
+  }
+}

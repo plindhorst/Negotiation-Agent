@@ -1,0 +1,126 @@
+{
+    "LinearAdditiveUtilitySpace": {
+        "issueUtilities": {
+            "salary": {
+                "DiscreteValueSetUtilities": {
+                    "valueUtilities": {
+                        "2000": 0,
+                        "2500": 0.25,
+                        "3000": 0.3,
+                        "3500": 0.75,
+                        "4000": 1.0
+                    }
+                }
+            },
+            "fte": {
+                "DiscreteValueSetUtilities": {
+                    "valueUtilities": {
+                        "0.6": 0.25,
+                        "0.8": 0.5,
+                        "1.0": 0.75
+                    }
+                }
+            },
+            "work from home": {
+                "DiscreteValueSetUtilities": {
+                    "valueUtilities": {
+                        "0": 0.333333333,
+                        "1": 0.5,
+                        "2": 0.666666666666
+                    }
+                }
+            },
+            "lease car": {
+                "DiscreteValueSetUtilities": {
+                    "valueUtilities": {
+                        "yes": 1,
+                        "no": 0
+                    }
+                }
+            },
+            "permanent contract": {
+                "DiscreteValueSetUtilities": {
+                    "valueUtilities": {
+                        "yes": 1,
+                        "no": 0
+                    }
+                }
+            },
+            "career development opportunities": {
+                "DiscreteValueSetUtilities": {
+                    "valueUtilities": {
+                        "low": 0,
+                        "medium": 0.5,
+                        "high": 1
+                    }
+                }
+            }
+        },
+        "issueWeights": {
+            "salary": 0.24,
+            "fte": 0.32,
+            "work from home": 0.18,
+            "lease car": 0.06,
+            "permanent contract": 0.16,
+            "career development opportunities": 0.04
+        },
+        "domain": {
+            "name": "jobs",
+            "issuesValues": {
+                "salary": {
+                    "values": [
+                        "2000",
+                        "2500",
+                        "3000",
+                        "3500",
+                        "4000"
+                    ]
+                },
+                "fte": {
+                    "values": [
+                        "0.6",
+                        "0.8",
+                        "1.0"
+                    ]
+                },
+                "work from home": {
+                    "values": [
+                        "0",
+                        "1",
+                        "2"
+                    ]
+                },
+                "lease car": {
+                    "values": [
+                        "yes",
+                        "no"
+                    ]
+                },
+                "permanent contract": {
+                    "values": [
+                        "yes",
+                        "no"
+                    ]
+                },
+                "career development opportunities": {
+                    "values": [
+                        "low",
+                        "medium",
+                        "high"
+                    ]
+                }
+            }
+        },
+        "name": "jobs1",
+        "reservationBid": {
+            "issuevalues": {
+                "salary": "3500",
+                "fte": "0.8",
+                "work from home": "1",
+                "lease car": "no",
+                "permanent contract": "yes",
+                "career development opportunities": "medium"
+            }
+        }
+    }
+}

@@ -1,0 +1,124 @@
+{
+  "actions": [
+    {
+      "Offer": {
+        "actor": "runner_agents_random_agent_random_agent_RandomAgent_1",
+        "bid": {
+          "issuevalues": {
+            "issueE": "valueC",
+            "issueC": "valueA",
+            "issueB": "valueI",
+            "issueA": "valueD",
+            "issueD": "valueA"
+          }
+        },
+        "utilities": {
+          "runner_agents_random_agent_random_agent_RandomAgent_1": 0.6885327976,
+          "party_Group58_NegotiationAssignment_Agent_2": 0.4478260661
+        }
+      }
+    },
+    {
+      "Offer": {
+        "actor": "party_Group58_NegotiationAssignment_Agent_2",
+        "bid": {
+          "issuevalues": {
+            "issueE": "valueC",
+            "issueC": "valueE",
+            "issueB": "valueC",
+            "issueA": "valueD",
+            "issueD": "valueC"
+          }
+        },
+        "utilities": {
+          "runner_agents_random_agent_random_agent_RandomAgent_1": 0.7869661331,
+          "party_Group58_NegotiationAssignment_Agent_2": 0.4454920789
+        }
+      }
+    },
+    {
+      "Accept": {
+        "actor": "runner_agents_random_agent_random_agent_RandomAgent_1",
+        "bid": {
+          "issuevalues": {
+            "issueE": "valueC",
+            "issueC": "valueE",
+            "issueB": "valueC",
+            "issueA": "valueD",
+            "issueD": "valueC"
+          }
+        },
+        "utilities": {
+          "runner_agents_random_agent_random_agent_RandomAgent_1": 0.7869661331,
+          "party_Group58_NegotiationAssignment_Agent_2": 0.4454920789
+        }
+      }
+    }
+  ],
+  "connections": [
+    "runner_agents_random_agent_random_agent_RandomAgent_1",
+    "party_Group58_NegotiationAssignment_Agent_2"
+  ],
+  "progress": {
+    "ProgressRounds": {
+      "duration": 200,
+      "currentRound": 1,
+      "endtime": 1644845799131
+    }
+  },
+  "settings": {
+    "SAOPSettings": {
+      "participants": [
+        {
+          "TeamInfo": {
+            "parties": [
+              {
+                "party": {
+                  "partyref": "pythonpath:runner.agents.random_agent.random_agent.RandomAgent",
+                  "parameters": {}
+                },
+                "profile": "file:runner/domains/domain00/profileA.json"
+              }
+            ]
+          }
+        },
+        {
+          "TeamInfo": {
+            "parties": [
+              {
+                "party": {
+                  "partyref": "pythonpath:party.Group58_NegotiationAssignment_Agent",
+                  "parameters": {}
+                },
+                "profile": "file:runner/domains/domain00/profileB.json"
+              }
+            ]
+          }
+        }
+      ],
+      "deadline": {
+        "DeadlineRounds": {
+          "rounds": 200,
+          "durationms": 999
+        }
+      }
+    }
+  },
+  "partyprofiles": {
+    "runner_agents_random_agent_random_agent_RandomAgent_1": {
+      "party": {
+        "partyref": "pythonpath:runner.agents.random_agent.random_agent.RandomAgent",
+        "parameters": {}
+      },
+      "profile": "file:runner/domains/domain00/profileA.json"
+    },
+    "party_Group58_NegotiationAssignment_Agent_2": {
+      "party": {
+        "partyref": "pythonpath:party.Group58_NegotiationAssignment_Agent",
+        "parameters": {}
+      },
+      "profile": "file:runner/domains/domain00/profileB.json"
+    }
+  },
+  "error": null
+}
