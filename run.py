@@ -14,10 +14,10 @@ if not os.path.exists("runner/results"):
 #   We need to specify a deadline of amount of rounds we can negotiate before we end without agreement
 settings = {
     "agents": [
-        "runner.agents.random_agent.random_agent.RandomAgent",
+        "party.Group58_NegotiationAssignment_Agent",
         "party.Group58_NegotiationAssignment_Agent",
     ],
-    "profiles": ["runner/domains/domain00/profileA.json", "runner/domains/domain00/profileB.json"],
+    "profiles": ["runner/domains/jobs/jobsprofileA.json", "runner/domains/jobs/jobsprofileB.json"],
     "deadline_rounds": 200,
 }
 
