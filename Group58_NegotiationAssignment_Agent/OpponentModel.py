@@ -2,7 +2,7 @@ class OpponentModel:
     def __init__(self, domain):
         self._domain = domain
         self._freqs = {}
-        self.empty = True
+        open('OpponentModel.log', 'w').close()
         for issue in self._domain.getIssues():
             self._freqs[issue] = {}
 
@@ -43,4 +43,10 @@ class OpponentModel:
             value = bid.getValue(issue)
             if value in self._freqs[issue]:
                 u += (self._freqs[issue][bid.getValue(issue)] / max_freqs[issue]) * weights[issue]
-        return u / len(self._domain.getIssues())
+
+        u /= len(self._domain.getIssues())
+
+        # save utilities in file for future logging
+        with open("OpponentModel.log", "a") as text_file:
+            text_file.write(str(u) + "\n")
+        return u

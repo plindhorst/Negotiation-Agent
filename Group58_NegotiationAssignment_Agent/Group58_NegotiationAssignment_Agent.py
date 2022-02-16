@@ -5,7 +5,6 @@ from typing import cast
 from geniusweb.actions.Accept import Accept
 from geniusweb.actions.Action import Action
 from geniusweb.actions.Offer import Offer
-from geniusweb.actions.PartyId import PartyId
 from geniusweb.bidspace.AllBidsList import AllBidsList
 from geniusweb.inform.ActionDone import ActionDone
 from geniusweb.inform.Finished import Finished
@@ -13,16 +12,11 @@ from geniusweb.inform.Inform import Inform
 from geniusweb.inform.Settings import Settings
 from geniusweb.inform.YourTurn import YourTurn
 from geniusweb.issuevalue.Bid import Bid
-from geniusweb.issuevalue.Domain import Domain
-from geniusweb.issuevalue.Value import Value
-from geniusweb.issuevalue.ValueSet import ValueSet
 from geniusweb.party.Capabilities import Capabilities
 from geniusweb.party.DefaultParty import DefaultParty
-from geniusweb.profile.utilityspace.UtilitySpace import UtilitySpace
 from geniusweb.profileconnection.ProfileConnectionFactory import (
     ProfileConnectionFactory,
 )
-from geniusweb.progress.ProgressRounds import ProgressRounds
 
 from Group58_NegotiationAssignment_Agent.OpponentModel import OpponentModel
 
@@ -122,8 +116,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         else:
             # if not, find a bid to propose as counter offer
             bid = self._findBid()
-            print(bid)
-            print("Bid utility: " + str(self.opponent_model.utility(bid)) + "\n")
+            opponent_utility = self.opponent_model.utility(bid)
             action = Offer(self._me, bid)
 
         # send the action
