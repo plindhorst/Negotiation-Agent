@@ -17,7 +17,7 @@ settings = {
         "runner.agents.random_agent.random_agent.RandomAgent",
         "party.Group58_NegotiationAssignment_Agent",
     ],
-    "profiles": ["runner/domains/domain00/profileA.json", "runner/domains/domain00/profileB.json"],
+    "profiles": ["runner/domains/jobs/jobsprofileA.json", "runner/domains/jobs/jobsprofileB.json"],
     "deadline_rounds": 200,
 }
 
