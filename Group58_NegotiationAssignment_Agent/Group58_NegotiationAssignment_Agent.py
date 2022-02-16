@@ -35,7 +35,8 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self.getReporter().log(logging.INFO, "party is initialized")
         self._profile = None
         self._last_received_bid: Bid = None
-        self.alpha = 0.6
+        self.alpha = 0.85
+        self.ceiling = 0.88
 
     def notifyChange(self, info: Inform):
         """This is the entry point of all interaction with your agent after is has been initialised.
@@ -43,7 +44,6 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         Args:
             info (Inform): Contains either a request for action or information.
         """
-
         # a Settings message is the first message that will be send to your
         # agent containing all the information about the negotiation session.
         if isinstance(info, Settings):
@@ -81,6 +81,8 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
                 logging.WARNING, "Ignoring unknown info " + str(info)
             )
 
+        print("alpha= ", self.alpha, "ceil= ", self.ceiling, "progress= ", self._progress.get(0))
+
     # lets the geniusweb system know what settings this agent can handle
     # leave it as it is for this course
     def getCapabilities(self) -> Capabilities:
@@ -108,6 +110,9 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
     # execute a turn
     def _myTurn(self):
+        if self._progress.get(0) * 100 % 1 == 0:
+            self.alpha -= 0.0035
+            self.ceiling -= 0.0035
         bid = self._findBid()
         # check if the last received offer if the opponent is good enough
         if self._isGood(self._last_received_bid, bid):
@@ -131,7 +136,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
         # very basic approach that accepts if the offer is valued above 0.6 and
         # 80% of the rounds towards the deadline have passed
-        return profile.getUtility(opponent_bid) > self.alpha  and (self._ac_next(opponent_bid, bid) or progress > 0.8)
+        return profile.getUtility(opponent_bid) > self.alpha and (self._ac_next(opponent_bid, bid) or progress > 0.8)
 
 
     def _findBid(self) -> Bid:
@@ -142,9 +147,9 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         final_bid = all_bids.get(randint(0, all_bids.size() - 1))
 
         # take 50 attempts at finding a random bid that is acceptable to us
-        for _ in range(50):
+        for _ in range(400):
             bid = all_bids.get(randint(0, all_bids.size() - 1))
-            if profile.getUtility(bid) > profile.getUtility(final_bid):
+            if profile.getUtility(bid) > profile.getUtility(final_bid) and profile.getUtility(bid) < self.ceiling:
                 final_bid = bid
             if profile.getUtility(final_bid) > self.alpha:
                 print("found a good bid")

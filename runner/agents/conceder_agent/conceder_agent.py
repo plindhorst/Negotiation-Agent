@@ -1,4 +1,4 @@
-from agents.time_dependent_agent.time_dependent_agent import TimeDependentAgent
+from runner.agents.time_dependent_agent.time_dependent_agent import TimeDependentAgent
 from tudelft_utilities_logging.Reporter import Reporter
 
 
