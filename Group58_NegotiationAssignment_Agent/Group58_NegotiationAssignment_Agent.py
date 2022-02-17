@@ -81,7 +81,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
                 logging.WARNING, "Ignoring unknown info " + str(info)
             )
 
-        print("alpha= ", self.alpha, "ceil= ", self.ceiling, "progress= ", self._progress.get(0))
+        # print("alpha=" + str(self.alpha) + " ceil= " + str(self.ceiling) + " progress= " + str(self._progress.get(0)))
 
     # lets the geniusweb system know what settings this agent can handle
     # leave it as it is for this course
@@ -132,11 +132,9 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         profile = self._profile.getProfile()
 
         progress = self._progress.get(0)
-        print("OUR UTILITY", profile.getUtility(bid), "\n")
 
-        # very basic approach that accepts if the offer is valued above 0.6 and
         # 80% of the rounds towards the deadline have passed
-        return profile.getUtility(opponent_bid) > self.alpha and (self._ac_next(opponent_bid, bid) or progress > 0.8)
+        return self._ac_next(opponent_bid, bid) or progress > 0.8 and self.alpha <= profile.getUtility(opponent_bid)
 
 
     def _findBid(self) -> Bid:
@@ -152,7 +150,6 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             if profile.getUtility(bid) > profile.getUtility(final_bid) and profile.getUtility(bid) < self.ceiling:
                 final_bid = bid
             if profile.getUtility(final_bid) > self.alpha:
-                print("found a good bid")
                 break
         return final_bid 
 
