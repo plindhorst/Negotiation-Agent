@@ -15,6 +15,18 @@ class OpponentModel:
             else:
                 self._freqs[issue][value] = 1
 
+    # get value for issue with highest frequency
+    def get_best_value(self, issue):
+        max = 0
+        value = 0
+
+        for val in self._freqs[issue]:
+            if (self._freqs[issue][val] > max):
+                max = self._freqs[issue][val]
+                value = val
+        
+        return value
+
     # returns normalized weights depending on importance of the issues
     # along with the largest value freq for each issue
     def _issue_weights(self):

@@ -1,6 +1,7 @@
+from copy import copy
 import logging
 from random import randint
-from typing import cast
+from typing import Dict, cast
 
 from geniusweb.actions.Accept import Accept
 from geniusweb.actions.Action import Action
@@ -12,6 +13,7 @@ from geniusweb.inform.Inform import Inform
 from geniusweb.inform.Settings import Settings
 from geniusweb.inform.YourTurn import YourTurn
 from geniusweb.issuevalue.Bid import Bid
+from geniusweb.issuevalue.Value import Value
 from geniusweb.party.Capabilities import Capabilities
 from geniusweb.party.DefaultParty import DefaultParty
 from geniusweb.profileconnection.ProfileConnectionFactory import (
@@ -31,6 +33,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self.getReporter().log(logging.INFO, "party is initialized")
         self._profile = None
         self._last_received_bid: Bid = None
+        self._last_sent_bid: Bid = None
         self.opponent_model = None
 
     def notifyChange(self, info: Inform):
@@ -115,8 +118,9 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             action = Accept(self._me, self._last_received_bid)
         else:
             # if not, find a bid to propose as counter offer
-            bid = self._findBid()
-            opponent_utility = self.opponent_model.utility(bid)
+            bid = self._findBid_trade_off()
+            self._last_sent_bid = copy(bid)
+            #opponent_utility = self.opponent_model.utility(bid)
             action = Offer(self._me, bid)
 
         # send the action
@@ -145,3 +149,39 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             if self._isGood(bid):
                 break
         return bid
+
+    # Find a bid by using trade off strategy.
+    def _findBid_trade_off(self) -> Bid:
+        opponentModel = self.opponent_model
+
+        domain = self._profile.getProfile().getDomain()
+        issues = domain.getIssues()
+        
+        # make dict for new bid.
+        issueValues:Dict[str, Value] = {}
+
+        # for each issue, get value from domain and value from opponent's bid
+        for (iss) in issues:
+            opponentValue = opponentModel.get_best_value(iss)
+
+            values = domain.getValues(iss)
+
+            #print("test", selfValue, opponentValue)
+            issueValues[iss] = self._find_trade_off(iss, values, opponentValue)
+
+
+        return Bid(issueValues)
+
+    # Find trade off between own preference and other.
+    def _find_trade_off(self, issue, values, opponentValue) -> Value:
+        if (self._last_sent_bid != None):
+            lbid = self._last_received_bid
+            # check if we can concede
+            lval = lbid.getValue(issue)
+
+            # now we have values, last_value and opponentValue
+            # for example values are [0, 1, 2, 3, 4, 5], 
+            # our last value was 0 (highest utility for us)
+            # their last value was 5 (highest utility for them)
+            # we want to concede towards that (so bid for 1,2,3 or 4)
+
