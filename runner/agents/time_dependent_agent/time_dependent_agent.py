@@ -37,7 +37,7 @@ from tudelft.utilities.immutablelist.ImmutableList import ImmutableList
 from time import sleep, time as clock
 from decimal import Decimal
 import sys
-from agents.time_dependent_agent.extended_util_space import ExtendedUtilSpace
+from runner.agents.time_dependent_agent.extended_util_space import ExtendedUtilSpace
 from tudelft_utilities_logging.Reporter import Reporter
 
 
