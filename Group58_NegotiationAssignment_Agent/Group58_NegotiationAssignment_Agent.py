@@ -1,5 +1,6 @@
 from copy import copy
 import logging
+import profile
 from random import randint
 from typing import Dict, cast
 
@@ -118,9 +119,13 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             action = Accept(self._me, self._last_received_bid)
         else:
             # if not, find a bid to propose as counter offer
-            bid = self._findBid_trade_off()
+            if (self._last_sent_bid == None):
+                bid = self._findBid()
+            else:
+                bid = self._findBid_trade_off()
+            
             self._last_sent_bid = copy(bid)
-            #opponent_utility = self.opponent_model.utility(bid)
+            opponent_utility = self.opponent_model.utility(bid)
             action = Offer(self._me, bid)
 
         # send the action
@@ -144,7 +149,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         all_bids = AllBidsList(domain)
 
         # take 50 attempts at finding a random bid that is acceptable to us
-        for _ in range(50):
+        for _ in range(200):
             bid = all_bids.get(randint(0, all_bids.size() - 1))
             if self._isGood(bid):
                 break
@@ -163,25 +168,46 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         # for each issue, get value from domain and value from opponent's bid
         for (iss) in issues:
             opponentValue = opponentModel.get_best_value(iss)
-
             values = domain.getValues(iss)
 
-            #print("test", selfValue, opponentValue)
             issueValues[iss] = self._find_trade_off(iss, values, opponentValue)
-
 
         return Bid(issueValues)
 
     # Find trade off between own preference and other.
     def _find_trade_off(self, issue, values, opponentValue) -> Value:
         if (self._last_sent_bid != None):
-            lbid = self._last_received_bid
+            lbid = self._last_sent_bid
             # check if we can concede
             lval = lbid.getValue(issue)
+
+            profile = self._profile.getProfile()
 
             # now we have values, last_value and opponentValue
             # for example values are [0, 1, 2, 3, 4, 5], 
             # our last value was 0 (highest utility for us)
             # their last value was 5 (highest utility for them)
             # we want to concede towards that (so bid for 1,2,3 or 4)
+            # however when we concede on the issue of most interest to other
+            # we want to gain on a issue with most interest to us.
+
+            # stupid code:
+            position_1 = -1
+            position_2 = -1
+            for i in range(values.size()):
+                if (values.get(i) == lval):
+                    position_1 = i
+                if (values.get(i) == opponentValue):
+                    position_2 = i
+
+            # Case we can concede a step
+            if (position_1 > position_2):
+                return values.get(position_1 - 1)
+            if (position_1 < position_2):
+                return values.get(position_1 + 1)
+            else:
+                return lval
+                
+        else:
+            return values.get(0)
 
