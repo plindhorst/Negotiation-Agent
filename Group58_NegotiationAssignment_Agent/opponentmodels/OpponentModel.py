@@ -2,31 +2,30 @@ class OpponentModel:
     def __init__(self, domain):
         self._domain = domain
         self._freqs = {}
-        self.opponent_bids = []
         open('OpponentModel.log', 'w').close()
         for issue in self._domain.getIssues():
             self._freqs[issue] = {}
 
     # Update value frequency for new incoming bid
     def update_frequencies(self, bid):
-        self.opponent_bids.append(bid)
-        for issue in self._domain.getIssues():
-            value = bid.getValue(issue)
-            if value in self._freqs[issue]:
-                self._freqs[issue][value] += 1
-            else:
-                self._freqs[issue][value] = 1
+        if bid is not None:
+            for issue in self._domain.getIssues():
+                value = bid.getValue(issue)
+                if value in self._freqs[issue]:
+                    self._freqs[issue][value] += 1
+                else:
+                    self._freqs[issue][value] = 1
 
     # get value for issue with highest frequency
     def get_best_value(self, issue):
-        max = 0
+        max_f = 0
         value = 0
 
         for val in self._freqs[issue]:
-            if (self._freqs[issue][val] > max):
-                max = self._freqs[issue][val]
+            if self._freqs[issue][val] > max_f:
+                max_f = self._freqs[issue][val]
                 value = val
-        
+
         return value
 
     # returns normalized weights depending on importance of the issues

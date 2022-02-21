@@ -29,8 +29,7 @@ settings = {
 
 # run a session and obtain results in dictionaries
 opponent_model, results_trace, results_summary = run_session(settings)
-
-if len(opponent_model) > 0:
+if "expected_utility" in opponent_model[0]:
     # plot opponent model vs. real utilities
     fig = plt.gcf()
     x = np.arange(len(opponent_model))
