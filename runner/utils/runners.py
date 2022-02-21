@@ -195,9 +195,11 @@ def process_results(results_class, results_dict):
                      "utility": action["Offer"]["utilities"][list(action["Offer"]["utilities"])[1]]}
 
             opponent_model.append(offer)
+
     with open("OpponentModel.log") as file:
         for i, line in enumerate(file):
-            opponent_model[i]["expected_utility"] = float(line.rstrip())
+            if i < len(opponent_model):
+                opponent_model[i]["expected_utility"] = float(line.rstrip())
 
     return opponent_model, results_dict, results_summary
 

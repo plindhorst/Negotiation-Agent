@@ -2,12 +2,14 @@ class OpponentModel:
     def __init__(self, domain):
         self._domain = domain
         self._freqs = {}
+        self.opponent_bids = []
         open('OpponentModel.log', 'w').close()
         for issue in self._domain.getIssues():
             self._freqs[issue] = {}
 
     # Update value frequency for new incoming bid
     def update_frequencies(self, bid):
+        self.opponent_bids.append(bid)
         for issue in self._domain.getIssues():
             value = bid.getValue(issue)
             if value in self._freqs[issue]:
