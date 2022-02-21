@@ -1,6 +1,8 @@
+from copy import copy
 import logging
+import profile
 from random import randint
-from typing import cast
+from typing import Dict, cast
 
 from geniusweb.actions.Accept import Accept
 from geniusweb.actions.Action import Action
@@ -12,6 +14,7 @@ from geniusweb.inform.Inform import Inform
 from geniusweb.inform.Settings import Settings
 from geniusweb.inform.YourTurn import YourTurn
 from geniusweb.issuevalue.Bid import Bid
+from geniusweb.issuevalue.Value import Value
 from geniusweb.party.Capabilities import Capabilities
 from geniusweb.party.DefaultParty import DefaultParty
 from geniusweb.profileconnection.ProfileConnectionFactory import (
@@ -31,9 +34,9 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self.getReporter().log(logging.INFO, "party is initialized")
         self._profile = None
         self._last_received_bid: Bid = None
-        self.alpha = 0.85
-        self.ceiling = 0.88
+        self._last_sent_bid: Bid = None
         self.opponent_model = None
+        self.alpha = 0.6
 
     def notifyChange(self, info: Inform):
         """This is the entry point of all interaction with your agent after is has been initialised.
@@ -41,6 +44,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         Args:
             info (Inform): Contains either a request for action or information.
         """
+
         # a Settings message is the first message that will be send to your
         # agent containing all the information about the negotiation session.
         if isinstance(info, Settings):
@@ -81,8 +85,6 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
                 logging.WARNING, "Ignoring unknown info " + str(info)
             )
 
-        # print("alpha=" + str(self.alpha) + " ceil= " + str(self.ceiling) + " progress= " + str(self._progress.get(0)))
-
     # lets the geniusweb system know what settings this agent can handle
     # leave it as it is for this course
     def getCapabilities(self) -> Capabilities:
@@ -110,19 +112,22 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
     # execute a turn
     def _myTurn(self):
-        if self._progress.get(0) * 100 % 1 == 0:
-            self.alpha -= 0.0035
-            self.ceiling -= 0.0035
-        bid = self._findBid()
+        # generate a bid for the opponent
+        bid = None
+        if self._last_sent_bid is None:
+            bid = self._findBid()
+        else:
+            bid = self._findBid_trade_off()
+
         if self._last_received_bid is not None:
             self.opponent_model.update_frequencies(self._last_received_bid)
-        # check if the last received offer if the opponent is good enough
+        # check if the last received offer from the opponent is good enough
         if self._isGood(self._last_received_bid, bid):
             # if so, accept the offer
             action = Accept(self._me, self._last_received_bid)
         else:
-            # if not, find a bid to propose as counter offer
-            bid = self._findBid()
+            # if not, counter offer
+            self._last_sent_bid = copy(bid)
             opponent_utility = self.opponent_model.utility(bid)
             action = Offer(self._me, bid)
 
@@ -130,35 +135,101 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self.getConnection().send(action)
 
     # method that checks if we would agree with an offer
-    def _isGood(self, opponent_bid: Bid, bid: Bid) -> bool:
+    def _isGood(self, opponent_bid: Bid, my_bid: Bid) -> bool:
         if opponent_bid is None:
             return False
         profile = self._profile.getProfile()
 
         progress = self._progress.get(0)
 
+        # very basic approach that accepts if the offer is valued above 0.6 and
         # 80% of the rounds towards the deadline have passed
-        return self._ac_next(opponent_bid, bid) or progress > 0.8 and self.alpha <= profile.getUtility(opponent_bid)
 
+        return (
+            self._ac_next(opponent_bid, my_bid)
+            or profile.getUtility(my_bid) > self.alpha
+            and progress > 0.8
+        )
 
     def _findBid(self) -> Bid:
         # compose a list of all possible bids
         domain = self._profile.getProfile().getDomain()
         all_bids = AllBidsList(domain)
-        profile = self._profile.getProfile()
-        final_bid = all_bids.get(randint(0, all_bids.size() - 1))
+
+        # Check if we are offering first
+        offering_first = False
+        if self._last_received_bid is None:
+            offering_first = True
 
         # take 50 attempts at finding a random bid that is acceptable to us
-        for _ in range(400):
+        for _ in range(200):
             bid = all_bids.get(randint(0, all_bids.size() - 1))
-            if profile.getUtility(bid) > profile.getUtility(final_bid) and profile.getUtility(bid) < self.ceiling:
-                final_bid = bid
-            if profile.getUtility(final_bid) > self.alpha:
+            # If we are the first ones to offer, check only that the utility is high
+            if (
+                offering_first
+                and self._profile.getProfile().getUtility(bid) > self.alpha
+            ):
                 break
-        return final_bid 
+            elif self._isGood(self._last_received_bid, bid):
+                break
+        return bid
 
-    def _ac_next(self, opponent_bid, bid) -> bool:
-        profile = self._profile.getProfile()
-        return profile.getUtility(bid) < profile.getUtility(opponent_bid) 
-        
-        
+    # Find a bid by using trade off strategy.
+    def _findBid_trade_off(self) -> Bid:
+        opponentModel = self.opponent_model
+
+        domain = self._profile.getProfile().getDomain()
+        issues = domain.getIssues()
+
+        # make dict for new bid.
+        issueValues: Dict[str, Value] = {}
+
+        # for each issue, get value from domain and value from opponent's bid
+        for iss in issues:
+            opponentValue = opponentModel.get_best_value(iss)
+            values = domain.getValues(iss)
+
+            issueValues[iss] = self._find_trade_off(iss, values, opponentValue)
+
+        return Bid(issueValues)
+
+    # Find trade off between own preference and other.
+    def _find_trade_off(self, issue, values, opponentValue) -> Value:
+        if self._last_sent_bid is not None:
+            lbid = self._last_sent_bid
+            # check if we can concede
+            lval = lbid.getValue(issue)
+
+            profile = self._profile.getProfile()
+
+            # now we have values, last_value and opponentValue
+            # for example values are [0, 1, 2, 3, 4, 5],
+            # our last value was 0 (highest utility for us)
+            # their last value was 5 (highest utility for them)
+            # we want to concede towards that (so bid for 1,2,3 or 4)
+            # however when we concede on the issue of most interest to other
+            # we want to gain on a issue with most interest to us.
+
+            # stupid code:
+            position_1 = -1
+            position_2 = -1
+            for i in range(values.size()):
+                if values.get(i) == lval:
+                    position_1 = i
+                if values.get(i) == opponentValue:
+                    position_2 = i
+
+            # Case we can concede a step
+            if position_1 > position_2:
+                return values.get(position_1 - 1)
+            if position_1 < position_2:
+                return values.get(position_1 + 1)
+            else:
+                return lval
+
+        else:
+            return values.get(0)
+
+    def _ac_next(self, opponont_bid: Bid, my_bid: Bid) -> bool:
+        prof = self._profile.getProfile()
+        return prof.getUtility(opponont_bid) > prof.getUtility(my_bid)

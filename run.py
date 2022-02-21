@@ -20,7 +20,10 @@ settings = {
         "party.Group58_NegotiationAssignment_Agent",
         "runner.agents.linear_agent.linear_agent.LinearAgent",
     ],
-    "profiles": ["runner/domains/jobs/jobsprofileA.json", "runner/domains/jobs/jobsprofileB.json"],
+    "profiles": [
+        "runner/domains/jobs/jobsprofileA.json",
+        "runner/domains/jobs/jobsprofileB.json",
+    ],
     "deadline_rounds": 200,
 }
 
@@ -31,23 +34,23 @@ if len(opponent_model) > 0:
     # plot opponent model vs. real utilities
     fig = plt.gcf()
     x = np.arange(len(opponent_model))
-    print()
-    print(opponent_model[0])
     real_utilities = np.vectorize(lambda x: x["utility"])(opponent_model)
-    moddeled_utilities = np.round(np.vectorize(lambda x: x["expected_utility"])(opponent_model), 3)
+    moddeled_utilities = np.round(
+        np.vectorize(lambda x: x["expected_utility"])(opponent_model), 3
+    )
     error = np.abs(moddeled_utilities - real_utilities)
     coef = np.polyfit(x, error, 1)
     poly1d_fn = np.poly1d(coef)
-    plt.plot(x, real_utilities, c="green", label='Real')
-    plt.plot(x, moddeled_utilities, c="red", label='Expected')
-    plt.plot(x, poly1d_fn(x), '--k', label='Error')
+    plt.plot(x, real_utilities, c="green", label="Real")
+    plt.plot(x, moddeled_utilities, c="red", label="Expected")
+    plt.plot(x, poly1d_fn(x), "--k", label="Error")
 
-    plt.xlabel('Rounds')
-    plt.ylabel('Utility')
-    plt.title('Opponent utility vs. expected utility model')
+    plt.xlabel("Rounds")
+    plt.ylabel("Utility")
+    plt.title("Opponent utility vs. expected utility model")
     plt.legend()
     fig.set_size_inches(20, 10)
-    plt.savefig('runner/results/opponent model.png', bbox_inches='tight')
+    plt.savefig("runner/results/opponent model.png", bbox_inches="tight")
 
 # plot trace to html file
 plot_trace(results_trace, "runner/results/trace_plot.html")
