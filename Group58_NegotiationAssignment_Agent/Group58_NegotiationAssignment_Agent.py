@@ -111,19 +111,21 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
     # execute a turn
     def _myTurn(self):
+        # generate a bid for the opponent
+        bid = None
+        if self._last_sent_bid is None:
+            bid = self._findBid()
+        else:
+            bid = self._findBid_trade_off()
+
         if self._last_received_bid is not None:
             self.opponent_model.update_frequencies(self._last_received_bid)
-        # check if the last received offer if the opponent is good enough
-        if self._isGood(self._last_received_bid):
+        # check if the last received offer from the opponent is good enough
+        if self._isGood(self._last_received_bid, bid):
             # if so, accept the offer
             action = Accept(self._me, self._last_received_bid)
         else:
-            # if not, find a bid to propose as counter offer
-            if (self._last_sent_bid == None):
-                bid = self._findBid()
-            else:
-                bid = self._findBid_trade_off()
-            
+            # if not, counter offer
             self._last_sent_bid = copy(bid)
             opponent_utility = self.opponent_model.utility(bid)
             action = Offer(self._me, bid)
@@ -132,8 +134,8 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self.getConnection().send(action)
 
     # method that checks if we would agree with an offer
-    def _isGood(self, bid: Bid) -> bool:
-        if bid is None:
+    def _isGood(self, opponent_bid: Bid, my_bid: Bid) -> bool:
+        if opponent_bid is None:
             return False
         profile = self._profile.getProfile()
 
@@ -141,7 +143,11 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
         # very basic approach that accepts if the offer is valued above 0.6 and
         # 80% of the rounds towards the deadline have passed
-        return profile.getUtility(bid) > 0.6 and progress > 0.8
+        return (
+            self._ac_next(opponent_bid, my_bid)
+            or profile.getUtility(my_bid) > 0.6
+            and progress > 0.8
+        )
 
     def _findBid(self) -> Bid:
         # compose a list of all possible bids
@@ -151,7 +157,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         # take 50 attempts at finding a random bid that is acceptable to us
         for _ in range(200):
             bid = all_bids.get(randint(0, all_bids.size() - 1))
-            if self._isGood(bid):
+            if self._isGood(self._last_received_bid, bid):
                 break
         return bid
 
@@ -161,12 +167,12 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
         domain = self._profile.getProfile().getDomain()
         issues = domain.getIssues()
-        
+
         # make dict for new bid.
-        issueValues:Dict[str, Value] = {}
+        issueValues: Dict[str, Value] = {}
 
         # for each issue, get value from domain and value from opponent's bid
-        for (iss) in issues:
+        for iss in issues:
             opponentValue = opponentModel.get_best_value(iss)
             values = domain.getValues(iss)
 
@@ -176,7 +182,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
     # Find trade off between own preference and other.
     def _find_trade_off(self, issue, values, opponentValue) -> Value:
-        if (self._last_sent_bid != None):
+        if self._last_sent_bid is not None:
             lbid = self._last_sent_bid
             # check if we can concede
             lval = lbid.getValue(issue)
@@ -184,7 +190,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             profile = self._profile.getProfile()
 
             # now we have values, last_value and opponentValue
-            # for example values are [0, 1, 2, 3, 4, 5], 
+            # for example values are [0, 1, 2, 3, 4, 5],
             # our last value was 0 (highest utility for us)
             # their last value was 5 (highest utility for them)
             # we want to concede towards that (so bid for 1,2,3 or 4)
@@ -195,19 +201,22 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             position_1 = -1
             position_2 = -1
             for i in range(values.size()):
-                if (values.get(i) == lval):
+                if values.get(i) == lval:
                     position_1 = i
-                if (values.get(i) == opponentValue):
+                if values.get(i) == opponentValue:
                     position_2 = i
 
             # Case we can concede a step
-            if (position_1 > position_2):
+            if position_1 > position_2:
                 return values.get(position_1 - 1)
-            if (position_1 < position_2):
+            if position_1 < position_2:
                 return values.get(position_1 + 1)
             else:
                 return lval
-                
+
         else:
             return values.get(0)
 
+    def _ac_next(self, opponont_bid: Bid, my_bid: Bid) -> bool:
+        prof = self._profile.getProfile()
+        return prof.getUtility(opponont_bid) > prof.getUtility(my_bid)
