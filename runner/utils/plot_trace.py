@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 def plot_trace(results_trace: dict, plot_file: str):
     utilities = defaultdict(lambda: defaultdict(lambda: {"x": [], "y": [], "bids": []}))
     accept = {"x": [], "y": [], "bids": []}
+    index = 0
     for index, action in enumerate(results_trace["actions"], 1):
         if "Offer" in action:
             offer = action["Offer"]
