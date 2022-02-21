@@ -36,6 +36,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self._last_received_bid: Bid = None
         self._last_sent_bid: Bid = None
         self.opponent_model = None
+        self.alpha = 0.6
 
     def notifyChange(self, info: Inform):
         """This is the entry point of all interaction with your agent after is has been initialised.
@@ -43,6 +44,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         Args:
             info (Inform): Contains either a request for action or information.
         """
+
         # a Settings message is the first message that will be send to your
         # agent containing all the information about the negotiation session.
         if isinstance(info, Settings):
@@ -82,8 +84,6 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             self.getReporter().log(
                 logging.WARNING, "Ignoring unknown info " + str(info)
             )
-
-        # print("alpha=" + str(self.alpha) + " ceil= " + str(self.ceiling) + " progress= " + str(self._progress.get(0)))
 
     # lets the geniusweb system know what settings this agent can handle
     # leave it as it is for this course
@@ -142,10 +142,12 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
         progress = self._progress.get(0)
 
+        # very basic approach that accepts if the offer is valued above 0.6 and
         # 80% of the rounds towards the deadline have passed
+
         return (
             self._ac_next(opponent_bid, my_bid)
-            or profile.getUtility(my_bid) > 0.6
+            or profile.getUtility(my_bid) > self.alpha
             and progress > 0.8
         )
 
@@ -153,13 +155,22 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         # compose a list of all possible bids
         domain = self._profile.getProfile().getDomain()
         all_bids = AllBidsList(domain)
-        profile = self._profile.getProfile()
-        final_bid = all_bids.get(randint(0, all_bids.size() - 1))
+
+        # Check if we are offering first
+        offering_first = False
+        if self._last_received_bid is None:
+            offering_first = True
 
         # take 50 attempts at finding a random bid that is acceptable to us
         for _ in range(200):
             bid = all_bids.get(randint(0, all_bids.size() - 1))
-            if self._isGood(self._last_received_bid, bid):
+            # If we are the first ones to offer, check only that the utility is high
+            if (
+                offering_first
+                and self._profile.getProfile().getUtility(bid) > self.alpha
+            ):
+                break
+            elif self._isGood(self._last_received_bid, bid):
                 break
         return bid
 
