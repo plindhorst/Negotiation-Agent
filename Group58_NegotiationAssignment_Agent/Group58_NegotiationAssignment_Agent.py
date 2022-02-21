@@ -5,7 +5,6 @@ from typing import cast
 from geniusweb.actions.Accept import Accept
 from geniusweb.actions.Action import Action
 from geniusweb.actions.Offer import Offer
-from geniusweb.actions.PartyId import PartyId
 from geniusweb.bidspace.AllBidsList import AllBidsList
 from geniusweb.inform.ActionDone import ActionDone
 from geniusweb.inform.Finished import Finished
@@ -13,16 +12,13 @@ from geniusweb.inform.Inform import Inform
 from geniusweb.inform.Settings import Settings
 from geniusweb.inform.YourTurn import YourTurn
 from geniusweb.issuevalue.Bid import Bid
-from geniusweb.issuevalue.Domain import Domain
-from geniusweb.issuevalue.Value import Value
-from geniusweb.issuevalue.ValueSet import ValueSet
 from geniusweb.party.Capabilities import Capabilities
 from geniusweb.party.DefaultParty import DefaultParty
-from geniusweb.profile.utilityspace.UtilitySpace import UtilitySpace
 from geniusweb.profileconnection.ProfileConnectionFactory import (
     ProfileConnectionFactory,
 )
-from geniusweb.progress.ProgressRounds import ProgressRounds
+
+from Group58_NegotiationAssignment_Agent.OpponentModel import OpponentModel
 
 
 class Group58_NegotiationAssignment_Agent(DefaultParty):
@@ -37,6 +33,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self._last_received_bid: Bid = None
         self.alpha = 0.85
         self.ceiling = 0.88
+        self.opponent_model = None
 
     def notifyChange(self, info: Inform):
         """This is the entry point of all interaction with your agent after is has been initialised.
@@ -57,6 +54,9 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             self._profile = ProfileConnectionFactory.create(
                 info.getProfile().getURI(), self.getReporter()
             )
+
+            self.opponent_model = OpponentModel(self._profile.getProfile().getDomain())
+
         # ActionDone is an action send by an opponent (an offer or an accept)
         elif isinstance(info, ActionDone):
             action: Action = cast(ActionDone, info).getAction()
@@ -114,12 +114,16 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             self.alpha -= 0.0035
             self.ceiling -= 0.0035
         bid = self._findBid()
+        if self._last_received_bid is not None:
+            self.opponent_model.update_frequencies(self._last_received_bid)
         # check if the last received offer if the opponent is good enough
         if self._isGood(self._last_received_bid, bid):
             # if so, accept the offer
             action = Accept(self._me, self._last_received_bid)
         else:
             # if not, find a bid to propose as counter offer
+            bid = self._findBid()
+            opponent_utility = self.opponent_model.utility(bid)
             action = Offer(self._me, bid)
 
         # send the action
