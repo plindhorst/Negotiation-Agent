@@ -43,7 +43,6 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         Args:
             info (Inform): Contains either a request for action or information.
         """
-
         # a Settings message is the first message that will be send to your
         # agent containing all the information about the negotiation session.
         if isinstance(info, Settings):
@@ -83,6 +82,8 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             self.getReporter().log(
                 logging.WARNING, "Ignoring unknown info " + str(info)
             )
+
+        # print("alpha=" + str(self.alpha) + " ceil= " + str(self.ceiling) + " progress= " + str(self._progress.get(0)))
 
     # lets the geniusweb system know what settings this agent can handle
     # leave it as it is for this course
@@ -141,7 +142,6 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
         progress = self._progress.get(0)
 
-        # very basic approach that accepts if the offer is valued above 0.6 and
         # 80% of the rounds towards the deadline have passed
         return (
             self._ac_next(opponent_bid, my_bid)
@@ -153,6 +153,8 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         # compose a list of all possible bids
         domain = self._profile.getProfile().getDomain()
         all_bids = AllBidsList(domain)
+        profile = self._profile.getProfile()
+        final_bid = all_bids.get(randint(0, all_bids.size() - 1))
 
         # take 50 attempts at finding a random bid that is acceptable to us
         for _ in range(200):
