@@ -31,6 +31,8 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self.getReporter().log(logging.INFO, "party is initialized")
         self._profile = None
         self._last_received_bid: Bid = None
+        self.alpha = 0.85
+        self.ceiling = 0.88
         self.opponent_model = None
 
     def notifyChange(self, info: Inform):
@@ -39,7 +41,6 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         Args:
             info (Inform): Contains either a request for action or information.
         """
-
         # a Settings message is the first message that will be send to your
         # agent containing all the information about the negotiation session.
         if isinstance(info, Settings):
@@ -80,6 +81,8 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
                 logging.WARNING, "Ignoring unknown info " + str(info)
             )
 
+        # print("alpha=" + str(self.alpha) + " ceil= " + str(self.ceiling) + " progress= " + str(self._progress.get(0)))
+
     # lets the geniusweb system know what settings this agent can handle
     # leave it as it is for this course
     def getCapabilities(self) -> Capabilities:
@@ -107,10 +110,14 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
     # execute a turn
     def _myTurn(self):
+        if self._progress.get(0) * 100 % 1 == 0:
+            self.alpha -= 0.0035
+            self.ceiling -= 0.0035
+        bid = self._findBid()
         if self._last_received_bid is not None:
             self.opponent_model.update_frequencies(self._last_received_bid)
         # check if the last received offer if the opponent is good enough
-        if self._isGood(self._last_received_bid):
+        if self._isGood(self._last_received_bid, bid):
             # if so, accept the offer
             action = Accept(self._me, self._last_received_bid)
         else:
@@ -123,25 +130,35 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self.getConnection().send(action)
 
     # method that checks if we would agree with an offer
-    def _isGood(self, bid: Bid) -> bool:
-        if bid is None:
+    def _isGood(self, opponent_bid: Bid, bid: Bid) -> bool:
+        if opponent_bid is None:
             return False
         profile = self._profile.getProfile()
 
         progress = self._progress.get(0)
 
-        # very basic approach that accepts if the offer is valued above 0.6 and
         # 80% of the rounds towards the deadline have passed
-        return profile.getUtility(bid) > 0.6 and progress > 0.8
+        return self._ac_next(opponent_bid, bid) or progress > 0.8 and self.alpha <= profile.getUtility(opponent_bid)
+
 
     def _findBid(self) -> Bid:
         # compose a list of all possible bids
         domain = self._profile.getProfile().getDomain()
         all_bids = AllBidsList(domain)
+        profile = self._profile.getProfile()
+        final_bid = all_bids.get(randint(0, all_bids.size() - 1))
 
         # take 50 attempts at finding a random bid that is acceptable to us
-        for _ in range(50):
+        for _ in range(400):
             bid = all_bids.get(randint(0, all_bids.size() - 1))
-            if self._isGood(bid):
+            if profile.getUtility(bid) > profile.getUtility(final_bid) and profile.getUtility(bid) < self.ceiling:
+                final_bid = bid
+            if profile.getUtility(final_bid) > self.alpha:
                 break
-        return bid
+        return final_bid 
+
+    def _ac_next(self, opponent_bid, bid) -> bool:
+        profile = self._profile.getProfile()
+        return profile.getUtility(bid) < profile.getUtility(opponent_bid) 
+        
+        
