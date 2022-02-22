@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from runner.utils.plot_trace import plot_trace
 from runner.utils.runners import run_session
 
-DOMAIN_PATH = "runner/domains/domain02/"
+DOMAIN_PATH = "runner/domains/domain03/"
 
 # parse given flag
 parser = argparse.ArgumentParser()
@@ -88,8 +88,8 @@ if args.trace and os.path.isfile(DOMAIN_PATH+'specials.json'):
     plt.title("Negotiation trace with Pareto Frontier")
 
     # Plot utilities
-    plt.plot(my_offer_utilities[:,0], my_offer_utilities[:,1], 'b-', label="My trace")
-    plt.plot(op_offer_utilities[:,0], op_offer_utilities[:,1], 'r-', label="Opponent trace")
+    plt.plot(my_offer_utilities[:,0], my_offer_utilities[:,1], 'r-', label="My trace")
+    plt.plot(op_offer_utilities[:,0], op_offer_utilities[:,1], 'b-', label="Opponent trace")
     # Plot accepted bid
     if accepted_bid is not None:
         x, y = accepted_bid["utilities"].values()

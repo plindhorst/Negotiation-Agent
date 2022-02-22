@@ -21,10 +21,12 @@ class TradeOffSimilarity:
         i = 0
 
         # generate up to generate_n viable bids
-        for x in range(all_bids.size()):
-            bid = all_bids.get(x)#randint(0, all_bids.size() - 1))
+        for _ in range(1000):
+            bid = all_bids.get(randint(0, all_bids.size() - 1))
             if (i == self._generate_n):
                 break
+            if (bid in optimal_bids):
+                continue
             if self._profile.getUtility(bid) >= self._alpha:
                 optimal_bids.append(bid)
                 i += 1
@@ -43,6 +45,8 @@ class TradeOffSimilarity:
             return self._random_bid()
         # generate n bids
         bids = self._iso_bids()
+        if (len(bids) == 0):
+            return self._random_bid()
 
         best_bid = bids[0]
         max_sim = 0
