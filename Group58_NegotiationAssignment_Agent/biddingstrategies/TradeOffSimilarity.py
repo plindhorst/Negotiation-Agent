@@ -2,15 +2,34 @@ from random import randint
 
 from geniusweb.bidspace.AllBidsList import AllBidsList
 
+from Group58_NegotiationAssignment_Agent.opponentmodels.OpponentModel import OpponentModel
+
 
 class TradeOffSimilarity:
-    def __init__(self, profile, opponent_model, alpha, domain, generate_n=50):
+    def __init__(self, profile, opponent_model : OpponentModel, alpha, domain, generate_n=50):
         self._profile = profile
         self._opponent_model = opponent_model
         self._alpha = alpha
         self._domain = domain
         self._generate_n = generate_n
         self._domain_size = len(self._domain.getIssues())
+
+    #TODO keep random, however bids may not be duplicate
+    def _iso_bids(self):
+        all_bids = AllBidsList(self._domain)
+        optimal_bids = []
+        i = 0
+
+        # generate up to generate_n viable bids
+        for x in range(all_bids.size()):
+            bid = all_bids.get(x)#randint(0, all_bids.size() - 1))
+            if (i == self._generate_n):
+                break
+            if self._profile.getUtility(bid) >= self._alpha:
+                optimal_bids.append(bid)
+                i += 1
+        
+        return optimal_bids
 
     def _random_bid(self):
         all_bids = AllBidsList(self._domain)
@@ -23,21 +42,32 @@ class TradeOffSimilarity:
         if last_opponent_bid is None:
             return self._random_bid()
         # generate n bids
-        bids = []
-        for i in range(self._generate_n):
-            bids.append(self._random_bid())
+        bids = self._iso_bids()
 
         best_bid = bids[0]
         max_sim = 0
         for bid in bids:
-            sim = self._similarity(bid, last_opponent_bid)
+            sim = self._similarity(bid)
             max_sim = sim if sim > max_sim else max_sim
             best_bid = bid if sim > max_sim else best_bid
+
+        self._alpha = self._update_alpha()
+
         return best_bid
 
-    def _similarity(self, bid_a, bid_b):
-        cosine_sim = 0
+    def _update_alpha(self):
+        #TODO update alpha according to time
+        if (self._alpha > 0.3):
+            return self._alpha - 0.003
+        else:
+            return self._alpha
+
+    def _similarity(self, bid):
+        total_sim = 0
         for issue in self._domain.getIssues():
-            if bid_a.getValue(issue) == bid_b.getValue(issue):
-                cosine_sim += 1
-        return cosine_sim / self._domain_size
+            value = bid.getValue(issue)
+            total_sim += self._opponent_model.get_frequency(issue, value)
+        
+        x = total_sim / self._domain_size
+
+        return x

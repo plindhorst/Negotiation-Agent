@@ -40,7 +40,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self._last_received_bid = None
         self._last_sent_bid = None
         self.opponent_model = None
-        self.alpha = 0.6
+        self.alpha = 0.7
         self.bidding_strat = None
         self.acceptance_strat = None
 
@@ -66,9 +66,9 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             )
 
             # BOA initializing
+            self.opponent_model = OpponentModel(self._profile.getProfile().getDomain())
             self.bidding_strat = TradeOffSimilarity(self._profile.getProfile(), self.opponent_model, self.alpha,
                                                     self._profile.getProfile().getDomain())
-            self.opponent_model = OpponentModel(self._profile.getProfile().getDomain())
             self.acceptance_strat = AcceptanceStrategy(self._profile.getProfile(), self.alpha,
                                                        self._profile.getProfile().getDomain())
 
