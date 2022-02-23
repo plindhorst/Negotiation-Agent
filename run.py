@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from runner.utils.plot_trace import plot_trace
 from runner.utils.runners import run_session
 
-DOMAIN_PATH = "runner/domains/domain03/"
+DOMAIN_PATH = "runner/domains/domain05/"
 
 # parse given flag
 parser = argparse.ArgumentParser()

@@ -2,11 +2,9 @@ from random import randint
 
 from geniusweb.bidspace.AllBidsList import AllBidsList
 
-from Group58_NegotiationAssignment_Agent.opponentmodels.OpponentModel import OpponentModel
-
 
 class TradeOffSimilarity:
-    def __init__(self, profile, opponent_model : OpponentModel, alpha, domain, generate_n=50):
+    def __init__(self, profile, opponent_model, alpha, domain, generate_n=50):
         self._profile = profile
         self._opponent_model = opponent_model
         self._alpha = alpha
@@ -35,7 +33,7 @@ class TradeOffSimilarity:
 
     def _random_bid(self):
         all_bids = AllBidsList(self._domain)
-        for _ in range(200):
+        for _ in range(400):
             bid = all_bids.get(randint(0, all_bids.size() - 1))
             if self._profile.getUtility(bid) >= self._alpha:
                 return bid
@@ -61,7 +59,7 @@ class TradeOffSimilarity:
 
     def _update_alpha(self):
         #TODO update alpha according to time
-        if (self._alpha > 0.3):
+        if (self._alpha > 0.6):
             return self._alpha - 0.003
         else:
             return self._alpha
@@ -70,7 +68,7 @@ class TradeOffSimilarity:
         total_sim = 0
         for issue in self._domain.getIssues():
             value = bid.getValue(issue)
-            total_sim += self._opponent_model.get_frequency(issue, value)
+            total_sim += self._opponent_model._getFraction(issue, value)
         
         x = total_sim / self._domain_size
 
