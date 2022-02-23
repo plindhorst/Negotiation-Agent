@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from runner.utils.plot_trace import plot_trace
 from runner.utils.runners import run_session
 
-DOMAIN_PATH = "runner/domains/domain05/"
+DOMAIN_PATH = "runner/domains/domain08/"
 
 # parse given flag
 parser = argparse.ArgumentParser()
@@ -38,7 +38,7 @@ settings = {
 
 
 # run a session and obtain results in dictionaries
-opponent_model, results_trace, results_summary = run_session(settings)
+results_trace, results_summary = run_session(settings)
 
 # If trace flag was set
 if args.trace and os.path.isfile(DOMAIN_PATH+'specials.json'):
