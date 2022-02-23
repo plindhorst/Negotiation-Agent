@@ -4,6 +4,7 @@ class OpponentModel:
         self._freqs = {}
         open('OpponentModel.log', 'w').close()
         for issue in self._domain.getIssues():
+
             self._freqs[issue] = {}
 
     # Update value frequency for new incoming bid
@@ -15,6 +16,16 @@ class OpponentModel:
                     self._freqs[issue][value] += 1
                 else:
                     self._freqs[issue][value] = 1
+
+    def get_frequency(self, issue, value):
+        if value not in self._freqs[issue]:
+            return 0
+
+        sum = 0
+        for val in self._freqs[issue]:
+            sum += self._freqs[issue][val]
+        
+        return self._freqs[issue][value] / sum
 
     # get value for issue with highest frequency
     def get_best_value(self, issue):

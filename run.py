@@ -8,13 +8,12 @@ from matplotlib import pyplot as plt
 from runner.utils.plot_trace import plot_trace
 from runner.utils.runners import run_session
 
-DOMAIN_PATH = "runner/domains/domain02/"
+DOMAIN_PATH = "runner/domains/domain03/"
 
 # parse given flag
 parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--trace", action="store_true", help="Generates negotiation trace graph"
-)
+parser.add_argument("--trace", action="store_true", help="Generates negotiation trace graph")
+parser.add_argument("--om", action="store_true", help="Generates opponent model graph")
 
 args = parser.parse_args()
 
@@ -38,10 +37,9 @@ settings = {
     "deadline_rounds": 200,
 }
 
-
 # run a session and obtain results in dictionaries
 opponent_model, results_trace, results_summary = run_session(settings)
-if "expected_utility" in opponent_model[0]:
+if args.om and "expected_utility" in opponent_model[0]:
     # plot opponent model vs. real utilities
     fig = plt.gcf()
     x = np.arange(len(opponent_model))
@@ -72,9 +70,9 @@ if args.trace and os.path.isfile(DOMAIN_PATH + "specials.json"):
 
     for action in results_trace["actions"]:
         if (
-            "Offer" in action
-            and action["Offer"]["actor"]
-            == "party_Group58_NegotiationAssignment_Agent_1"
+                "Offer" in action
+                and action["Offer"]["actor"]
+                == "party_Group58_NegotiationAssignment_Agent_1"
         ):
             my_offer_utilities.append(list(action["Offer"]["utilities"].values()))
         elif "Accept" in action:
@@ -94,10 +92,8 @@ if args.trace and os.path.isfile(DOMAIN_PATH + "specials.json"):
     plt.title("Negotiation trace with Pareto Frontier")
 
     # Plot utilities
-    plt.plot(my_offer_utilities[:, 0], my_offer_utilities[:, 1], "r-", label="My trace")
-    plt.plot(
-        op_offer_utilities[:, 0], op_offer_utilities[:, 1], "b-", label="Opponent trace"
-    )
+    plt.plot(my_offer_utilities[:, 0], my_offer_utilities[:, 1], 'r-', label="My trace")
+    plt.plot(op_offer_utilities[:, 0], op_offer_utilities[:, 1], 'b-', label="Opponent trace")
     # Plot accepted bid
     if accepted_bid is not None:
         x, y = accepted_bid["utilities"].values()
@@ -114,7 +110,6 @@ if args.trace and os.path.isfile(DOMAIN_PATH + "specials.json"):
 
     plt.legend()
     plt.savefig("runner/results/negotiation_trace.png", bbox_inches="tight")
-
 
 # plot trace to html file
 plot_trace(results_trace, "runner/results/trace_plot.html")
