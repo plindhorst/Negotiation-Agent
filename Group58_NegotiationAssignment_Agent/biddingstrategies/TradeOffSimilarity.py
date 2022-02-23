@@ -4,10 +4,11 @@ from geniusweb.bidspace.AllBidsList import AllBidsList
 
 
 class TradeOffSimilarity:
-    def __init__(self, profile, opponent_model, alpha, domain, generate_n=50):
+    def __init__(self, profile, opponent_model, alpha, ceiling, domain, generate_n=50):
         self._profile = profile
         self._opponent_model = opponent_model
         self._alpha = alpha
+        self._ceiling = ceiling
         self._domain = domain
         self._generate_n = generate_n
         self._domain_size = len(self._domain.getIssues())
@@ -19,11 +20,11 @@ class TradeOffSimilarity:
         i = 0
 
         # generate up to generate_n viable bids
-        for _ in range(1000):
+        for _ in range(100):
             bid = all_bids.get(randint(0, all_bids.size() - 1))
-            if (i == self._generate_n):
+            if i == self._generate_n:
                 break
-            if (bid in optimal_bids):
+            if bid in optimal_bids:
                 continue
             if self._profile.getUtility(bid) >= self._alpha:
                 optimal_bids.append(bid)
@@ -33,18 +34,21 @@ class TradeOffSimilarity:
 
     def _random_bid(self):
         all_bids = AllBidsList(self._domain)
-        for _ in range(400):
+        best = all_bids.get(randint(0, all_bids.size() - 1))
+        for _ in range(100):
             bid = all_bids.get(randint(0, all_bids.size() - 1))
-            if self._profile.getUtility(bid) >= self._alpha:
-                return bid
+            if self._ceiling >= self._profile.getUtility(bid) >= self._alpha and \
+                self._profile.getUtility(bid) > self._profile.getUtility(best):
+                best = bid
+        return best
 
     def find_bid(self, last_opponent_bid):
         if last_opponent_bid is None:
             return self._random_bid()
         # generate n bids
-        bids = self._iso_bids()
-        if (len(bids) == 0):
-            return self._random_bid()
+        bids = []
+        while len(bids) == 0:
+            bids = self._iso_bids()
 
         best_bid = bids[0]
         max_sim = 0
@@ -52,8 +56,6 @@ class TradeOffSimilarity:
             sim = self._similarity(bid)
             max_sim = sim if sim > max_sim else max_sim
             best_bid = bid if sim > max_sim else best_bid
-
-        self._alpha = self._update_alpha()
 
         return best_bid
 

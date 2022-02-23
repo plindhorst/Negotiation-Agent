@@ -41,7 +41,8 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self._last_received_bid = None
         self._last_sent_bid = None
         self.opponent_model = None
-        self.alpha = 0.7
+        self.alpha = 0.75
+        self.ceiling = 0.95
         self.bidding_strat = None
         self.acceptance_strat = None
 
@@ -69,7 +70,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             # BOA initializing
             self.opponent_model = FrequencyOpponentModel.create()
             self.bidding_strat = TradeOffSimilarity(self._profile.getProfile(), self.opponent_model, self.alpha,
-                                                    self._profile.getProfile().getDomain())
+                                                    self.ceiling, self._profile.getProfile().getDomain())
             self.acceptance_strat = AcceptanceStrategy(self._profile.getProfile(), self.alpha,
                                                        self._profile.getProfile().getDomain())
 
@@ -78,7 +79,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             action: Action = cast(ActionDone, info).getAction()
 
             # update opponent model
-            if self._last_received_bid != None:
+            if self._last_received_bid is not None:
                 self.opponent_model = self.opponent_model.WithAction(action, self._progress)
 
             # if it is an offer, set the last received bid
@@ -131,10 +132,32 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
     def _my_turn(self):
 
         # generate a bid for the opponent
+        self.update_alpha()
         bid = self.bidding_strat.find_bid(self._last_received_bid)
+        if self._profile.getProfile().getUtility(bid) > self.ceiling:
+            bid = self.bidding_strat.find_bid(self._last_received_bid)
 
         # check if opponents bid is better than ours, if yes then accept, else offer our bid
-        if self.acceptance_strat.is_good(self._last_received_bid, bid, self._progress.get(0)):
+        if self.is_good(self._last_received_bid, bid, self._progress.get(0)):
             self.getConnection().send(Accept(self._me, self._last_received_bid))
         else:
             self.getConnection().send(Offer(self._me, bid))
+
+    def is_good(self, opponent_bid, my_bid, progress):
+        # very basic approach that accepts if the offer is valued above alpha and
+        # 80% of the rounds towards the deadline have passed
+
+        return (
+                self._accept_next(opponent_bid, my_bid)
+                or self._profile.getProfile().getUtility(my_bid) > self.alpha
+                and progress > 0.9
+        )
+
+    def _accept_next(self, opponent_bid, my_bid):
+        return opponent_bid is not None and self._profile.getProfile().getUtility(opponent_bid) > \
+               self._profile.getProfile().getUtility(my_bid)
+
+    def update_alpha(self):
+        if self._progress.get(0) > 0.5:
+            self.alpha = self.alpha - (0.01 * self._progress.get(0))
+            self.ceiling = self.alpha + 0.2
