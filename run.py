@@ -12,7 +12,9 @@ DOMAIN_PATH = "runner/domains/domain03/"
 
 # parse given flag
 parser = argparse.ArgumentParser()
-parser.add_argument('--trace', action='store_true', help='Generates negotiation trace graph')
+parser.add_argument(
+    "--trace", action="store_true", help="Generates negotiation trace graph"
+)
 
 args = parser.parse_args()
 
@@ -62,14 +64,18 @@ if "expected_utility" in opponent_model[0]:
     plt.savefig("runner/results/opponent model.png", bbox_inches="tight")
 
 # If trace flag was set
-if args.trace and os.path.isfile(DOMAIN_PATH+'specials.json'):
+if args.trace and os.path.isfile(DOMAIN_PATH + "specials.json"):
     # Gatherd utilities
     my_offer_utilities = []
     op_offer_utilities = []
     accepted_bid = None
 
     for action in results_trace["actions"]:
-        if "Offer" in action and action["Offer"]["actor"] == "party_Group58_NegotiationAssignment_Agent_1":
+        if (
+            "Offer" in action
+            and action["Offer"]["actor"]
+            == "party_Group58_NegotiationAssignment_Agent_1"
+        ):
             my_offer_utilities.append(list(action["Offer"]["utilities"].values()))
         elif "Accept" in action:
             accepted_bid = action["Accept"]
@@ -95,15 +101,14 @@ if args.trace and os.path.isfile(DOMAIN_PATH+'specials.json'):
         x, y = accepted_bid["utilities"].values()
         plt.scatter(x, y, color="green", label="Accepted bid")
     # Plot Pareto Frontier
-    with open(DOMAIN_PATH + 'specials.json') as json_file:
+    with open(DOMAIN_PATH + "specials.json") as json_file:
         pf = json.load(json_file)
         utils = []
         for bid in pf["pareto_front"]:
             utils.append(bid["utility"])
 
         utils = np.array(utils)
-        plt.plot(utils[:, 0], utils[:, 1], '.y-', label="Pareto Front")
-
+        plt.plot(utils[:, 0], utils[:, 1], ".y-", label="Pareto Front")
 
     plt.legend()
     plt.savefig("runner/results/negotiation_trace.png", bbox_inches="tight")
