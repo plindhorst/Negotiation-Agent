@@ -1,11 +1,12 @@
+from copy import copy
 import logging
+import profile
 from random import randint
-from typing import cast
+from typing import Dict, cast
 
 from geniusweb.actions.Accept import Accept
 from geniusweb.actions.Action import Action
 from geniusweb.actions.Offer import Offer
-from geniusweb.actions.PartyId import PartyId
 from geniusweb.bidspace.AllBidsList import AllBidsList
 from geniusweb.inform.ActionDone import ActionDone
 from geniusweb.inform.Finished import Finished
@@ -13,16 +14,17 @@ from geniusweb.inform.Inform import Inform
 from geniusweb.inform.Settings import Settings
 from geniusweb.inform.YourTurn import YourTurn
 from geniusweb.issuevalue.Bid import Bid
-from geniusweb.issuevalue.Domain import Domain
 from geniusweb.issuevalue.Value import Value
-from geniusweb.issuevalue.ValueSet import ValueSet
 from geniusweb.party.Capabilities import Capabilities
 from geniusweb.party.DefaultParty import DefaultParty
-from geniusweb.profile.utilityspace.UtilitySpace import UtilitySpace
 from geniusweb.profileconnection.ProfileConnectionFactory import (
     ProfileConnectionFactory,
 )
-from geniusweb.progress.ProgressRounds import ProgressRounds
+
+from Group58_NegotiationAssignment_Agent.opponentmodels.OpponentModel import OpponentModel
+
+from Group58_NegotiationAssignment_Agent.acceptancestrategies.AcceptanceStrategy import AcceptanceStrategy
+from Group58_NegotiationAssignment_Agent.biddingstrategies.TradeOffSimilarity import TradeOffSimilarity
 
 
 class Group58_NegotiationAssignment_Agent(DefaultParty):
@@ -32,9 +34,15 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
     def __init__(self):
         super().__init__()
+
         self.getReporter().log(logging.INFO, "party is initialized")
         self._profile = None
-        self._last_received_bid: Bid = None
+        self._last_received_bid = None
+        self._last_sent_bid = None
+        self.opponent_model = None
+        self.alpha = 0.6
+        self.bidding_strat = None
+        self.acceptance_strat = None
 
     def notifyChange(self, info: Inform):
         """This is the entry point of all interaction with your agent after is has been initialised.
@@ -56,6 +64,14 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             self._profile = ProfileConnectionFactory.create(
                 info.getProfile().getURI(), self.getReporter()
             )
+
+            # BOA initializing
+            self.bidding_strat = TradeOffSimilarity(self._profile.getProfile(), self.opponent_model, self.alpha,
+                                                    self._profile.getProfile().getDomain())
+            self.opponent_model = OpponentModel(self._profile.getProfile().getDomain())
+            self.acceptance_strat = AcceptanceStrategy(self._profile.getProfile(), self.alpha,
+                                                       self._profile.getProfile().getDomain())
+
         # ActionDone is an action send by an opponent (an offer or an accept)
         elif isinstance(info, ActionDone):
             action: Action = cast(ActionDone, info).getAction()
@@ -66,7 +82,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         # YourTurn notifies you that it is your turn to act
         elif isinstance(info, YourTurn):
             # execute a turn
-            self._myTurn()
+            self._my_turn()
 
             # log that we advanced a turn
             self._progress = self._progress.advance()
@@ -106,39 +122,17 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         return "Template agent for Collaborative AI course"
 
     # execute a turn
-    def _myTurn(self):
-        # check if the last received offer if the opponent is good enough
-        if self._isGood(self._last_received_bid):
-            # if so, accept the offer
-            action = Accept(self._me, self._last_received_bid)
+    def _my_turn(self):
+
+        # save opponents bid into opponentmodel
+        self.opponent_model.update_frequencies(self._last_received_bid)
+
+        # generate a bid for the opponent
+        bid = self.bidding_strat.find_bid(self._last_received_bid)
+
+        # check if opponents bid is better than ours, if yes then accept, else offer our bid
+        if self.acceptance_strat.is_good(self._last_received_bid, bid, self._progress.get(0)):
+            self.getConnection().send(Accept(self._me, self._last_received_bid))
         else:
-            # if not, find a bid to propose as counter offer
-            bid = self._findBid()
-            action = Offer(self._me, bid)
-
-        # send the action
-        self.getConnection().send(action)
-
-    # method that checks if we would agree with an offer
-    def _isGood(self, bid: Bid) -> bool:
-        if bid is None:
-            return False
-        profile = self._profile.getProfile()
-
-        progress = self._progress.get(0)
-
-        # very basic approach that accepts if the offer is valued above 0.6 and
-        # 80% of the rounds towards the deadline have passed
-        return profile.getUtility(bid) > 0.6 and progress > 0.8
-
-    def _findBid(self) -> Bid:
-        # compose a list of all possible bids
-        domain = self._profile.getProfile().getDomain()
-        all_bids = AllBidsList(domain)
-
-        # take 50 attempts at finding a random bid that is acceptable to us
-        for _ in range(50):
-            bid = all_bids.get(randint(0, all_bids.size() - 1))
-            if self._isGood(bid):
-                break
-        return bid
+            self.opponent_model.utility(bid) # save opponent utility
+            self.getConnection().send(Offer(self._me, bid))

@@ -18,7 +18,7 @@ from runner.utils.ask_proceed import ask_proceed
 from runner.utils.std_out_reporter import StdOutReporter
 
 
-def run_session(settings) -> Tuple[dict, dict]:
+def run_session(settings):
     agents = settings["agents"]
     profiles = settings["profiles"]
     rounds = settings["deadline_rounds"]
@@ -80,9 +80,9 @@ def run_session(settings) -> Tuple[dict, dict]:
     results_dict = ObjectMapper().toJson(results_class)
 
     # add utilities to the results and create a summary
-    results_trace, results_summary = process_results(results_class, results_dict)
+    opponent_model, results_trace, results_summary = process_results(results_class, results_dict)
 
-    return results_trace, results_summary
+    return opponent_model, results_trace, results_summary
 
 
 def run_tournament(tournament_settings: dict) -> Tuple[list, list]:
@@ -98,7 +98,6 @@ def run_tournament(tournament_settings: dict) -> Tuple[list, list]:
             print("Exiting script")
             exit()
 
-
     results_summaries = []
     tournament = []
     for profiles in profile_sets:
@@ -113,7 +112,7 @@ def run_tournament(tournament_settings: dict) -> Tuple[list, list]:
             }
 
             # run a single negotiation session
-            _, results_summary = run_session(settings)
+            _, _, results_summary = run_session(settings)
 
             # assemble results
             tournament.append(settings)
@@ -188,7 +187,21 @@ def process_results(results_class, results_dict):
         results_summary["social_welfare"] = 0
         results_summary["result"] = "ERROR"
 
-    return results_dict, results_summary
+    # combine expected model with real values
+    opponent_model = []
+    for action in results_dict["actions"]:
+        if "Offer" in action and action["Offer"]["actor"] == "party_Group58_NegotiationAssignment_Agent_1":
+            offer = {"issues": action["Offer"]["bid"]["issuevalues"],
+                     "utility": action["Offer"]["utilities"][list(action["Offer"]["utilities"])[1]]}
+
+            opponent_model.append(offer)
+
+    with open("OpponentModel.log") as file:
+        for i, line in enumerate(file):
+            if i < len(opponent_model):
+                opponent_model[i]["expected_utility"] = float(line.rstrip())
+
+    return opponent_model, results_dict, results_summary
 
 
 def get_utility_function(profile_uri) -> LinearAdditiveUtilitySpace:
