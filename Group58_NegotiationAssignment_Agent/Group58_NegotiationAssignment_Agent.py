@@ -20,11 +20,10 @@ from geniusweb.party.DefaultParty import DefaultParty
 from geniusweb.profileconnection.ProfileConnectionFactory import (
     ProfileConnectionFactory,
 )
-
-from Group58_NegotiationAssignment_Agent.opponentmodels.OpponentModel import OpponentModel
+from geniusweb.opponentmodel.FrequencyOpponentModel import FrequencyOpponentModel
 
 from Group58_NegotiationAssignment_Agent.acceptancestrategies.AcceptanceStrategy import AcceptanceStrategy
-from Group58_NegotiationAssignment_Agent.biddingstrategies.TradeOffSimilarity import TradeOffSimilarity
+from Group58_NegotiationAssignment_Agent.biddingstrategies.TradeOff import TradeOff
 
 
 class Group58_NegotiationAssignment_Agent(DefaultParty):
@@ -40,7 +39,8 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self._last_received_bid = None
         self._last_sent_bid = None
         self.opponent_model = None
-        self.alpha = 0.7
+        self.alpha = 0.9
+        self.beta = 0.6
         self.bidding_strat = None
         self.acceptance_strat = None
 
@@ -66,19 +66,24 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             )
 
             # BOA initializing
-            self.opponent_model = OpponentModel(self._profile.getProfile().getDomain())
-            self.bidding_strat = TradeOffSimilarity(self._profile.getProfile(), self.opponent_model, self.alpha,
+            self.opponent_model = FrequencyOpponentModel.create()
+            self.bidding_strat = TradeOff(self._profile.getProfile(), self.opponent_model, self.alpha,
                                                     self._profile.getProfile().getDomain())
-            self.acceptance_strat = AcceptanceStrategy(self._profile.getProfile(), self.alpha,
+            self.acceptance_strat = AcceptanceStrategy(self._profile.getProfile(), self.beta,
                                                        self._profile.getProfile().getDomain())
 
         # ActionDone is an action send by an opponent (an offer or an accept)
         elif isinstance(info, ActionDone):
             action: Action = cast(ActionDone, info).getAction()
 
+            # update opponent model
+            if self._last_received_bid != None:
+                self.opponent_model = self.opponent_model.WithAction(action, self._progress)
+
             # if it is an offer, set the last received bid
             if isinstance(action, Offer):
                 self._last_received_bid = cast(Offer, action).getBid()
+                self.opponent_model = self.opponent_model.With(self._profile.getProfile().getDomain(), self._last_received_bid)
         # YourTurn notifies you that it is your turn to act
         elif isinstance(info, YourTurn):
             # execute a turn
@@ -123,10 +128,6 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
     # execute a turn
     def _my_turn(self):
-
-        # save opponents bid into opponentmodel
-        self.opponent_model.update_frequencies(self._last_received_bid)
-
         # generate a bid for the opponent
         bid = self.bidding_strat.find_bid(self._last_received_bid)
 
@@ -134,5 +135,4 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         if self.acceptance_strat.is_good(self._last_received_bid, bid, self._progress.get(0)):
             self.getConnection().send(Accept(self._me, self._last_received_bid))
         else:
-            self.opponent_model.utility(bid) # save opponent utility
             self.getConnection().send(Offer(self._me, bid))
