@@ -1,7 +1,7 @@
 class AcceptanceStrategy:
-    def __init__(self, profile, beta, domain):
+    def __init__(self, profile, floor, domain):
         self._profile = profile
-        self._beta = beta
+        self._floor = floor
         self._issues = domain.getIssues()
 
     # method that checks if we would agree with an offer
@@ -11,7 +11,7 @@ class AcceptanceStrategy:
 
         return (
                 self._accept_next(opponent_bid, my_bid)
-                or self._profile.getUtility(my_bid) > self._beta
+                or self._profile.getUtility(my_bid) > self._floor
                 and progress > 0.8
         )
 

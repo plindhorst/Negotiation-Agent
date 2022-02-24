@@ -11,10 +11,10 @@ from Group58_NegotiationAssignment_Agent.biddingstrategies.TradeOffSimilarity im
 
 
 class TradeOff:
-    def __init__(self, profile, opponent_model, alpha, domain):
+    def __init__(self, profile, opponent_model, offer, domain):
         self._profile = profile
         self._opponent_model = opponent_model
-        self._alpha = alpha
+        self._offer = offer
         self._tolerance = 0.1
         self._domain = domain
         self._issues = domain.getIssues()
@@ -31,7 +31,7 @@ class TradeOff:
         all_bids = AllBidsList(self._domain)
         for _ in range(200):
             bid = all_bids.get(randint(0, all_bids.size() - 1))
-            if self._profile.getUtility(bid) >= self._alpha:
+            if self._profile.getUtility(bid) >= self._offer:
                 return bid
 
     # Return set of iso curve bids.
@@ -45,7 +45,7 @@ class TradeOff:
         if last_opponent_bid is None:
             return self._random_bid()
         # generate n bids
-        bids = self._iso_bids(self._alpha, self._tolerance)
+        bids = self._iso_bids(self._offer, self._tolerance)
         if (bids.size() == 0):
             return self._random_bid()
 

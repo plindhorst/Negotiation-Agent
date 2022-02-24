@@ -39,8 +39,8 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self._last_received_bid = None
         self._last_sent_bid = None
         self.opponent_model = None
-        self.alpha = 0.9
-        self.beta = 0.6
+        self.offer = 0.9
+        self.floor = 0.6
         self.bidding_strat = None
         self.acceptance_strat = None
 
@@ -67,9 +67,9 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
             # BOA initializing
             self.opponent_model = FrequencyOpponentModel.create()
-            self.bidding_strat = TradeOff(self._profile.getProfile(), self.opponent_model, self.alpha,
+            self.bidding_strat = TradeOff(self._profile.getProfile(), self.opponent_model, self.offer,
                                                     self._profile.getProfile().getDomain())
-            self.acceptance_strat = AcceptanceStrategy(self._profile.getProfile(), self.beta,
+            self.acceptance_strat = AcceptanceStrategy(self._profile.getProfile(), self.floor,
                                                        self._profile.getProfile().getDomain())
 
         # ActionDone is an action send by an opponent (an offer or an accept)
