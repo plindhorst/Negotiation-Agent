@@ -66,7 +66,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             )
 
             # BOA initializing
-            self.opponent_model = FrequencyOpponentModel.create()
+            self.opponent_model = FrequencyOpponentModel.create().With(self._profile.getProfile().getDomain(), None)
             self.bidding_strat = TradeOff(self._profile.getProfile(), self.opponent_model, self.offer,
                                                     self._profile.getProfile().getDomain())
             self.acceptance_strat = AcceptanceStrategy(self._profile.getProfile(), self.floor,
@@ -76,14 +76,10 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         elif isinstance(info, ActionDone):
             action: Action = cast(ActionDone, info).getAction()
 
-            # update opponent model
-            if self._last_received_bid != None:
-                self.opponent_model = self.opponent_model.WithAction(action, self._progress)
-
             # if it is an offer, set the last received bid
             if isinstance(action, Offer):
                 self._last_received_bid = cast(Offer, action).getBid()
-                self.opponent_model = self.opponent_model.With(self._profile.getProfile().getDomain(), self._last_received_bid)
+                self.opponent_model = self.opponent_model.WithAction(action, self._progress)
         # YourTurn notifies you that it is your turn to act
         elif isinstance(info, YourTurn):
             # execute a turn
