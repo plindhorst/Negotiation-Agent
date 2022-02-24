@@ -26,28 +26,18 @@ class TradeOff:
     def _setUtilSpace(self) -> LinearAdditive:
         return cast(LinearAdditive, self._profile)
 
-    # Create a random bid.
-    def _random_bid(self):
-        all_bids = AllBidsList(self._domain)
-        for _ in range(200):
-            bid = all_bids.get(randint(0, all_bids.size() - 1))
-            if self._profile.getUtility(bid) >= self._offer:
-                return bid
-
     # Return set of iso curve bids.
-    def _iso_bids(self, goal, tolerance):
+    def _iso_bids(self):
         return self._bidUtils.getBids(
-            Interval(Decimal.from_float(goal - tolerance), Decimal.from_float(goal))
+            Interval(Decimal.from_float(self._offer - self._tolerance), Decimal.from_float(self._offer))
         )
 
     # Find a bid by using trade off strategy.
     def find_bid(self, last_opponent_bid):
-        if last_opponent_bid is None:
-            return self._random_bid()
         # generate n bids
-        bids = self._iso_bids(self._offer, self._tolerance)
-        if (bids.size() == 0):
-            return self._random_bid()
+        bids = self._iso_bids()
+        if last_opponent_bid is None:
+            return bids.get(0)
 
         best_bid = bids.get(0)
         max_sim = 0
