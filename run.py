@@ -1,9 +1,10 @@
+import argparse
 import json
 import os
-import argparse
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib import pyplot as plt
 
 from runner.utils.plot_trace import plot_trace
 from runner.utils.runners import run_session
@@ -40,6 +41,17 @@ settings = {
 # run a session and obtain results in dictionaries
 results_trace, results_summary = run_session(settings)
 
+
+def color_gradient(n):
+    colors = []
+    for j in range(n):
+        c1 = np.array(mpl.colors.to_rgb("yellow"))
+        c2 = np.array(mpl.colors.to_rgb("red"))
+        hex = mpl.colors.to_hex((1 - j / n) * c1 + j / n * c2)
+        colors.append(hex)
+    return colors
+
+
 # If trace flag was set
 if args.trace and os.path.isfile(DOMAIN_PATH + "specials.json"):
     # Gatherd utilities
@@ -71,12 +83,21 @@ if args.trace and os.path.isfile(DOMAIN_PATH + "specials.json"):
     plt.title("Negotiation trace with Pareto Frontier")
 
     # Plot utilities
-    plt.plot(my_offer_utilities[:, 0], my_offer_utilities[:, 1], 'r-', label="My trace")
-    plt.plot(op_offer_utilities[:, 0], op_offer_utilities[:, 1], 'b-', label="Opponent trace")
+    m, b = np.polyfit(my_offer_utilities[:, 0], my_offer_utilities[:, 1], 1)
+    plt.plot(my_offer_utilities[:, 0], m * my_offer_utilities[:, 0] + b, c='orange', label="Linear Regression",
+             zorder=10)
+    # earlier bids are yellow
+    gradient = color_gradient(len(my_offer_utilities))
+    for i, offer_utility in enumerate(my_offer_utilities):
+        temp = np.zeros(len(my_offer_utilities))
+        temp[i] = offer_utility[1]
+        plt.scatter(offer_utility[0], offer_utility[1], c=gradient[i], s=20, zorder=10)
+
+    plt.plot(op_offer_utilities[:, 0], op_offer_utilities[:, 1], c='grey', label="Opponent trace")
     # Plot accepted bid
     if accepted_bid is not None:
         x, y = accepted_bid["utilities"].values()
-        plt.scatter(x, y, color="green", label="Accepted bid")
+        plt.scatter(x, y, color="green", label="Accepted bid", s=60, zorder=11)
     # Plot Pareto Frontier
     with open(DOMAIN_PATH + "specials.json") as json_file:
         pf = json.load(json_file)
@@ -85,7 +106,7 @@ if args.trace and os.path.isfile(DOMAIN_PATH + "specials.json"):
             utils.append(bid["utility"])
 
         utils = np.array(utils)
-        plt.plot(utils[:, 0], utils[:, 1], ".y-", label="Pareto Front")
+        plt.plot(utils[:, 0], utils[:, 1], color="blue", label="Pareto Front")
 
     plt.legend()
     plt.savefig("runner/results/negotiation_trace.png", bbox_inches="tight")
