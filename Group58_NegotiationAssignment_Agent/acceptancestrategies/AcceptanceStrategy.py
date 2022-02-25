@@ -8,10 +8,13 @@ class AcceptanceStrategy:
     def is_good(self, opponent_bid, my_bid, progress):
         # very basic approach that accepts if the offer is valued above [floor] and
         # 80% of the rounds towards the deadline have passed
+        A_const = False
+        if (opponent_bid != None):
+            A_const = self._profile.getUtility(opponent_bid) > self._floor
 
         return (
                 self._accept_next(opponent_bid, my_bid)
-                or self._profile.getUtility(opponent_bid) > self._floor
+                or A_const
                 and progress > 0.8
         )
 
