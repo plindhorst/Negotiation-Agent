@@ -6,12 +6,12 @@ class AcceptanceStrategy:
 
     # method that checks if we would agree with an offer
     def is_good(self, opponent_bid, my_bid, progress):
-        # very basic approach that accepts if the offer is valued above 0.6 and
+        # very basic approach that accepts if the offer is valued above [floor] and
         # 80% of the rounds towards the deadline have passed
 
         return (
                 self._accept_next(opponent_bid, my_bid)
-                or self._profile.getUtility(my_bid) > self._floor
+                or self._profile.getUtility(opponent_bid) > self._floor
                 and progress > 0.8
         )
 
