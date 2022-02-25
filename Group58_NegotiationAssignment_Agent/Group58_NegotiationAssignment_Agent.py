@@ -28,6 +28,9 @@ from Group58_NegotiationAssignment_Agent.acceptancestrategies.AcceptanceStrategy
 from Group58_NegotiationAssignment_Agent.biddingstrategies.TitForTat import (
     TitForTat,
 )
+from Group58_NegotiationAssignment_Agent.opponentmodels.OpponentModel import (
+    OpponentModel,
+)
 
 
 class Group58_NegotiationAssignment_Agent(DefaultParty):
@@ -41,10 +44,11 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self.getReporter().log(logging.INFO, "party is initialized")
         self._profile = None
         self._last_received_bid = None
+        self._scnd_to_last_received_bid = None
         self._last_proposed_bid = None
         self._last_sent_bid = None
         self.opponent_model = None
-        self.alpha = 0.7
+        self.alpha = 0.6
         self.bidding_strat = None
         self.acceptance_strat = None
 
@@ -75,6 +79,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             self.opponent_model = self.opponent_model.With(
                 self._profile.getProfile().getDomain(), None
             )
+            # self.opponent_model = OpponentModel(self._profile.getProfile().getDomain())
             self.bidding_strat = TitForTat(
                 self._profile.getProfile(),
                 self.opponent_model,
@@ -93,11 +98,14 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
             # if it is an offer, set the last received bid
             if isinstance(action, Offer):
+                self._scnd_to_last_received_bid = self._last_received_bid
                 self._last_received_bid = cast(Offer, action).getBid()
                 # update opponent model
                 self.opponent_model = self.opponent_model.WithAction(
                     action, self._progress
                 )
+                self.bidding_strat.opponent_model = self.opponent_model
+                # self.opponent_model.update_frequencies(self._last_received_bid)
 
         # YourTurn notifies you that it is your turn to act
         elif isinstance(info, YourTurn):
@@ -145,7 +153,9 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
     def _my_turn(self):
 
         bid = self.bidding_strat.find_bid(
-            self._last_received_bid, self._last_proposed_bid
+            self._last_received_bid,
+            self._scnd_to_last_received_bid,
+            self._last_proposed_bid,
         )
 
         # check if opponents bid is better than ours, if yes then accept, else offer our bid
