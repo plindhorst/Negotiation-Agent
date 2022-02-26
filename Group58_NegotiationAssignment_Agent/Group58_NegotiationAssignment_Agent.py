@@ -3,6 +3,7 @@ import logging
 import profile
 from random import randint
 from typing import Dict, cast
+from queue import Queue
 
 from geniusweb.actions.Accept import Accept
 from geniusweb.actions.Action import Action
@@ -17,6 +18,7 @@ from geniusweb.issuevalue.Bid import Bid
 from geniusweb.issuevalue.Value import Value
 from geniusweb.party.Capabilities import Capabilities
 from geniusweb.party.DefaultParty import DefaultParty
+from geniusweb.progress.ProgressRounds import ProgressRounds
 from geniusweb.profileconnection.ProfileConnectionFactory import (
     ProfileConnectionFactory,
 )
@@ -44,9 +46,8 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self.getReporter().log(logging.INFO, "party is initialized")
         self._profile = None
         self._last_received_bid = None
-        self._scnd_to_last_received_bid = None
+        self._opponent_bids = Queue()
         self._last_proposed_bid = None
-        self._last_sent_bid = None
         self.opponent_model = None
         self.alpha = 0.6
         self.bidding_strat = None
@@ -97,9 +98,13 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             action: Action = cast(ActionDone, info).getAction()
 
             # if it is an offer, set the last received bid
-            if isinstance(action, Offer):
-                self._scnd_to_last_received_bid = self._last_received_bid
+            if isinstance(action, Offer) and "58" not in action.getActor().getName():
                 self._last_received_bid = cast(Offer, action).getBid()
+                if self._opponent_bids.qsize() < 2:
+                    self._opponent_bids.put(
+                        Bid(self._last_received_bid.getIssueValues())
+                    )
+
                 # update opponent model
                 self.opponent_model = self.opponent_model.WithAction(
                     action, self._progress
@@ -113,7 +118,8 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             self._my_turn()
 
             # log that we advanced a turn
-            self._progress = self._progress.advance()
+            if isinstance(self._progress, ProgressRounds):
+                self._progress = self._progress.advance()
 
         # Finished will be send if the negotiation has ended (through agreement or deadline)
         elif isinstance(info, Finished):
@@ -153,8 +159,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
     def _my_turn(self):
 
         bid = self.bidding_strat.find_bid(
-            self._last_received_bid,
-            self._scnd_to_last_received_bid,
+            self._opponent_bids,
             self._last_proposed_bid,
         )
 
