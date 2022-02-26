@@ -50,12 +50,13 @@ class TitForTat:
                 print("conceded")
             else:
                 # opponent did not concede. Don't retaliate. Expand search space
-                return my_bid_last
-                range = Interval(
-                    Decimal(my_bid_last_util - Decimal(0.05)),
-                    Decimal(my_bid_last_util + Decimal(0.05)),
-                )
+
                 print("not")
+                return my_bid_last
+                # range = Interval(
+                #     Decimal(my_bid_last_util - Decimal(0.05)),
+                #     Decimal(my_bid_last_util + Decimal(0.05)),
+                # )
 
             print(range)
             bids = self._bid_provider.getBids(range)
