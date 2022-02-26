@@ -35,21 +35,22 @@ class TitForTat:
             my_bid_last_util = self._profile.getUtility(my_bid_last)
             op_bid_old_util = self._profile.getUtility(op_bid_old)
             op_bid_new_util = self._profile.getUtility(op_bid_new)
-            util_diff = abs(op_bid_old_util - op_bid_new_util)
-            print(util_diff)
+            util_diff = abs(op_bid_old_util - op_bid_new_util) * Decimal(0.5)
+            # print(util_diff)
             range = None
             if op_bid_new_util > op_bid_old_util:
                 # if the new offer has higher util than before
                 # opponent made a concession for my utility and we
                 # are reciprocating by also making a concession
                 range = Interval(
-                    Decimal(self._floor),
                     Decimal(my_bid_last_util - util_diff),
+                    Decimal(my_bid_last_util),
                 )
 
                 print("conceded")
             else:
                 # opponent did not concede. Don't retaliate. Expand search space
+                return my_bid_last
                 range = Interval(
                     Decimal(my_bid_last_util - Decimal(0.05)),
                     Decimal(my_bid_last_util + Decimal(0.05)),
@@ -67,6 +68,7 @@ class TitForTat:
         best_bid_for_op = self._find_best_bid(
             bids
         )  # bids.get(randint(0, bids.size() - 1))
+        print(self.opponent_model.getUtility(best_bid_for_op))
         return best_bid_for_op
 
     def _find_best_bid(self, bids) -> Bid:

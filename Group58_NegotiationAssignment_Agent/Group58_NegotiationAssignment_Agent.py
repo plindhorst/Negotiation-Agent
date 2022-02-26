@@ -49,7 +49,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self._opponent_bids = Queue()
         self._last_proposed_bid = None
         self.opponent_model = None
-        self.alpha = 0.6
+        self.alpha = 0.7
         self.bidding_strat = None
         self.acceptance_strat = None
 
@@ -106,6 +106,10 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
                     )
 
                 # update opponent model
+                # self.opponent_model.With(
+                #     self._profile.getProfile().getDomain(),
+                #     self.opponent_model.getReservationBid(),
+                # )
                 self.opponent_model = self.opponent_model.WithAction(
                     action, self._progress
                 )

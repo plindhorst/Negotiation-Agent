@@ -32,9 +32,9 @@ settings = {
         "party.Group58_NegotiationAssignment_Agent",
         # "runner.agents.random_agent.random_agent.RandomAgent",
         # "runner.agents.boulware_agent.boulware_agent.BoulwareAgent",
-        "runner.agents.conceder_agent.conceder_agent.ConcederAgent",
+        # "runner.agents.conceder_agent.conceder_agent.ConcederAgent",
         # "runner.agents.hardliner_agent.hardliner_agent.HardlinerAgent",
-        # "runner.agents.linear_agent.linear_agent.LinearAgent"
+        "runner.agents.linear_agent.linear_agent.LinearAgent"
         # "runner.agents.stupid_agent.stupid_agent.StupidAgent",
     ],
     "profiles": [
