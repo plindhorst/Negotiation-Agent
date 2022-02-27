@@ -1,5 +1,3 @@
-from random import randint
-
 from geniusweb.opponentmodel.FrequencyOpponentModel import FrequencyOpponentModel
 
 class TradeOffSimilarity:

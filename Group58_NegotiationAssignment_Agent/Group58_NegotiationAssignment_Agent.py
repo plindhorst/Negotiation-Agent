@@ -1,27 +1,23 @@
-from copy import copy
 import logging
-import profile
-from random import randint
 from typing import Dict, cast
 from queue import Queue
 
 from geniusweb.actions.Accept import Accept
 from geniusweb.actions.Action import Action
 from geniusweb.actions.Offer import Offer
-from geniusweb.bidspace.AllBidsList import AllBidsList
 from geniusweb.inform.ActionDone import ActionDone
 from geniusweb.inform.Finished import Finished
 from geniusweb.inform.Inform import Inform
 from geniusweb.inform.Settings import Settings
 from geniusweb.inform.YourTurn import YourTurn
 from geniusweb.issuevalue.Bid import Bid
-from geniusweb.issuevalue.Value import Value
 from geniusweb.party.Capabilities import Capabilities
 from geniusweb.party.DefaultParty import DefaultParty
 from geniusweb.profileconnection.ProfileConnectionFactory import (
     ProfileConnectionFactory,
 )
 from geniusweb.opponentmodel.FrequencyOpponentModel import FrequencyOpponentModel
+from Group58_NegotiationAssignment_Agent.Constants import Constants
 
 from Group58_NegotiationAssignment_Agent.acceptancestrategies.AcceptanceStrategy import AcceptanceStrategy
 from Group58_NegotiationAssignment_Agent.biddingstrategies.TradeOff import TradeOff
@@ -41,8 +37,8 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self._opponent_bids = Queue()
         self._last_sent_bid = None
         self.opponent_model = None
-        self.offer = 0.9
-        self.floor = 0.6
+        self.offer = Constants.offer
+        self.floor = Constants.floor
         self.bidding_strat = None
         self.acceptance_strat = None
 

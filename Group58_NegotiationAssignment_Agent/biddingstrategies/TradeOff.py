@@ -1,11 +1,10 @@
-from random import randint
 from typing import cast
 
-from geniusweb.bidspace.AllBidsList import AllBidsList
 from geniusweb.bidspace.BidsWithUtility import BidsWithUtility
 from geniusweb.profile.utilityspace.LinearAdditive import LinearAdditive
 from geniusweb.bidspace.Interval import Interval
 from decimal import Decimal
+from Group58_NegotiationAssignment_Agent.Constants import Constants
 from Group58_NegotiationAssignment_Agent.biddingstrategies.TitForTat import TitForTat
 
 from Group58_NegotiationAssignment_Agent.biddingstrategies.TradeOffSimilarity import TradeOffSimilarity
@@ -17,7 +16,7 @@ class TradeOff:
         self._opponent_model = opponent_model
         self._offer = offer
         self._boulware = offer
-        self._tolerance = 0.1
+        self._tolerance = Constants.iso_bids_tolerance
         self._domain = domain
         self._issues = domain.getIssues()
         self._utilspace = self._setUtilSpace()
@@ -37,8 +36,8 @@ class TradeOff:
 
     # Return value which starts at offer and goes down in a boulware fashion
     def _time_dependent(self, progress):
-        #if (progress > 0.2):
-        self._boulware = self._boulware - (0.01 * progress)
+        if (progress > Constants.boulware_time_limit and self._boulware > Constants.floor):
+            self._boulware = self._boulware - (Constants.boulware_conceding_speed * progress)
             
         return self._boulware 
 
@@ -56,6 +55,7 @@ class TradeOff:
 
 
         self._offer = max(self._time_dependent(progress), float(self._tft.find_offer(opponent_bids)))
+        print(self._offer, progress)
 
         best_bid = bids.get(0)
         max_sim = 0

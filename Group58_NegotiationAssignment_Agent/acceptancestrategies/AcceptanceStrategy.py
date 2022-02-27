@@ -1,3 +1,6 @@
+from Group58_NegotiationAssignment_Agent.Constants import Constants
+
+
 class AcceptanceStrategy:
     def __init__(self, profile, floor, domain):
         self._profile = profile
@@ -15,7 +18,7 @@ class AcceptanceStrategy:
         return (
                 self._accept_next(opponent_bid, my_bid)
                 or A_const
-                and progress > 0.8
+                and progress > Constants.acceptance_time_limit
         )
 
     def _accept_next(self, opponent_bid, my_bid):
