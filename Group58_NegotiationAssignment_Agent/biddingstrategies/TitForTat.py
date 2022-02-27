@@ -23,6 +23,7 @@ class TitForTat:
         if op_bids.qsize() < 2 or my_bid_last is None:
             range = Interval(Decimal(0.85), Decimal(0.95))
             bids = self._bid_provider.getBids(range)
+            return bids.get(randint(0, bids.size() - 1))
         # else, reciprocate by copying opponents move.
         else:
             # Measure the difference between utilities of the last two opponent bids.
@@ -35,10 +36,11 @@ class TitForTat:
             my_bid_last_util = self._profile.getUtility(my_bid_last)
             op_bid_old_util = self._profile.getUtility(op_bid_old)
             op_bid_new_util = self._profile.getUtility(op_bid_new)
-            util_diff = abs(op_bid_old_util - op_bid_new_util) * Decimal(0.5)
+            util_diff = abs(op_bid_old_util - op_bid_new_util) * Decimal(0.4)
             # print(util_diff)
             range = None
             if op_bid_new_util > op_bid_old_util:
+                print("conceded")
                 # if the new offer has higher util than before
                 # opponent made a concession for my utility and we
                 # are reciprocating by also making a concession
@@ -47,10 +49,16 @@ class TitForTat:
                     Decimal(my_bid_last_util),
                 )
 
-                print("conceded")
+                bids = self._bid_provider.getBids(range)
+                # Prevent having empty bids list by expanding it slightly till we find bids
+                while bids.size() == 0:
+                    range.add(Interval(Decimal(-0.01), Decimal(0.01)))
+                    bids = self._bid_provider.getBids(range)
+
+                # Find a bid that is best for the opponent using opponent model
+                return self._estimate_nash_point(bids, my_bid_last_util)
             else:
                 # opponent did not concede. Don't retaliate. Expand search space
-
                 print("not")
                 return my_bid_last
                 # range = Interval(
@@ -58,26 +66,18 @@ class TitForTat:
                 #     Decimal(my_bid_last_util + Decimal(0.05)),
                 # )
 
-            print(range)
-            bids = self._bid_provider.getBids(range)
-            # Prevent having empty bids list by expanding it slightly till we find bids
-            while bids.size() == 0:
-                range.add(Interval(Decimal(-0.01), Decimal(0.01)))
-                bids = self._bid_provider.getBids(range)
-
-        # Find a bid that is best for the opponent using opponent model
-        best_bid_for_op = self._find_best_bid(
-            bids
-        )  # bids.get(randint(0, bids.size() - 1))
-        print(self.opponent_model.getUtility(best_bid_for_op))
-        return best_bid_for_op
-
-    def _find_best_bid(self, bids) -> Bid:
-        best_bid_for_op = bids.get(randint(0, bids.size() - 1))
+    def _estimate_nash_point(self, bids, my_bid_util) -> Bid:
+        best_bid_for_op = None
+        max_nash = 0
         for bid in bids:
-            if self.opponent_model.getUtility(bid) > self.opponent_model.getUtility(
-                best_bid_for_op
-            ):
+            op_bid_util = self.opponent_model.getUtility(bid)
+            print(op_bid_util)
+            nash = op_bid_util * my_bid_util
+            if nash > max_nash:
                 best_bid_for_op = bid
+                max_nash = nash
 
+        print(max_nash)
+
+        print(best_bid_for_op)
         return best_bid_for_op
