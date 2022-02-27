@@ -3,6 +3,7 @@ import logging
 import profile
 from random import randint
 from typing import Dict, cast
+from queue import Queue
 
 from geniusweb.actions.Accept import Accept
 from geniusweb.actions.Action import Action
@@ -37,6 +38,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self.getReporter().log(logging.INFO, "party is initialized")
         self._profile = None
         self._last_received_bid = None
+        self._opponent_bids = Queue()
         self._last_sent_bid = None
         self.opponent_model = None
         self.offer = 0.9
@@ -77,8 +79,14 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             action: Action = cast(ActionDone, info).getAction()
 
             # if it is an offer, set the last received bid
-            if isinstance(action, Offer):
+            if isinstance(action, Offer) and action.getActor().getName() != self._me.getName():
                 self._last_received_bid = cast(Offer, action).getBid()
+
+                if self._opponent_bids.qsize() < 2:
+                    self._opponent_bids.put(
+                        Bid(self._last_received_bid.getIssueValues())
+                    )
+
                 self.opponent_model = self.opponent_model.WithAction(action, self._progress)
         # YourTurn notifies you that it is your turn to act
         elif isinstance(info, YourTurn):
@@ -125,7 +133,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
     # execute a turn
     def _my_turn(self):
         # generate a bid for the opponent
-        bid = self.bidding_strat.find_bid(self._last_received_bid)
+        bid = self.bidding_strat.find_bid(self._last_received_bid, self._opponent_bids, self._progress.get(0))
 
         # check if opponents bid is better than ours, if yes then accept, else offer our bid
         if self.acceptance_strat.is_good(self._last_received_bid, bid, self._progress.get(0)):
