@@ -16,6 +16,7 @@ class TradeOff:
         self._profile = profile
         self._opponent_model = opponent_model
         self._offer = offer
+        self._boulware = offer
         self._tolerance = 0.1
         self._domain = domain
         self._issues = domain.getIssues()
@@ -34,22 +35,34 @@ class TradeOff:
             Interval(Decimal.from_float(self._offer - self._tolerance), Decimal.from_float(self._offer + self._tolerance))
         )
 
+    # Return value which starts at offer and goes down in a boulware fashion
+    def _time_dependent(self, progress):
+        #if (progress > 0.2):
+        self._boulware = self._boulware - (0.01 * progress)
+            
+        return self._boulware 
+
     # Find a bid by using trade off strategy.
     def find_bid(self, last_opponent_bid, opponent_bids, progress):
 
-        #offer = Max(floor, (TFT * (1 - time) + Time_Dependent * time) / 2)
-        self._offer = float(self._tft.find_offer(opponent_bids)) #* (1.0 - progress)
+        #offer = Max(floor, (TFT * (1 - time) + Time_Dependent * time))
+        #self._offer = max(0.6, float(self._tft.find_offer(opponent_bids)) * (1.0 - progress) + self._time_dependent(progress) * progress)
+        
 
         # generate n bids
         bids = self._iso_bids()
         if last_opponent_bid is None:
             return bids.get(0)
 
+
+        self._offer = max(self._time_dependent(progress), float(self._tft.find_offer(opponent_bids)))
+
         best_bid = bids.get(0)
         max_sim = 0
         for bid in bids:
             sim = self._tradeOffSimilarity._similarity(bid)
-            max_sim = sim if sim > max_sim else max_sim
-            best_bid = bid if sim > max_sim else best_bid
+            if (sim > max_sim):
+                best_bid = bid
+                max_sim = sim
 
         return best_bid

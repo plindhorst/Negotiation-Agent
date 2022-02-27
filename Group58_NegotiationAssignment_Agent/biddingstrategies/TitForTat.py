@@ -29,7 +29,10 @@ class TitForTat:
 
             op_bid_old_util = self._profile.getUtility(op_bid_old)
             op_bid_new_util = self._profile.getUtility(op_bid_new)
-            util_diff = abs(op_bid_old_util - op_bid_new_util) * Decimal(0.5)
+            util_diff = abs(op_bid_old_util - op_bid_new_util)
+            
+            if (util_diff > 0.1):
+                util_diff = Decimal(0.1)
 
             if op_bid_new_util > op_bid_old_util:
                 # if the new offer has higher util than before
@@ -37,7 +40,7 @@ class TitForTat:
                 # are reciprocating by also making a concession
 
                 print("conceded")
-                self._offer = Decimal(self._offer) - util_diff
+                self._offer = Decimal(self._offer) - util_diff #Decimal(0.05)
                 return self._offer
         
         return Decimal(self._offer)

@@ -29,6 +29,6 @@ class TradeOffSimilarity:
             value = bid.getValue(issue)
             total_sim += self._opponent_model._getFraction(issue, value)
         
-        x = total_sim / self._domain_size
+        x = total_sim
 
         return x
