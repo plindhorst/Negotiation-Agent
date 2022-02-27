@@ -20,6 +20,7 @@ from geniusweb.opponentmodel.FrequencyOpponentModel import FrequencyOpponentMode
 from Group58_NegotiationAssignment_Agent.Constants import Constants
 
 from Group58_NegotiationAssignment_Agent.acceptancestrategies.AcceptanceStrategy import AcceptanceStrategy
+from Group58_NegotiationAssignment_Agent.biddingstrategies.TitForTat import TitForTat
 from Group58_NegotiationAssignment_Agent.biddingstrategies.TradeOff import TradeOff
 
 
@@ -35,11 +36,12 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self._profile = None
         self._last_received_bid = None
         self._opponent_bids = Queue()
-        self._last_sent_bid = None
+        self._last_proposed_bid = None
         self.opponent_model = None
         self.offer = Constants.offer
         self.floor = Constants.floor
-        self.bidding_strat = None
+        self.tradeoff_bidding_strat = None
+        self.tft_bidding_strat = None
         self.acceptance_strat = None
 
     def notifyChange(self, info: Inform):
@@ -65,8 +67,9 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
             # BOA initializing
             self.opponent_model = FrequencyOpponentModel.create().With(self._profile.getProfile().getDomain(), None)
-            self.bidding_strat = TradeOff(self._profile.getProfile(), self.opponent_model, self.offer,
+            self.tradeoff_bidding_strat = TradeOff(self._profile.getProfile(), self.opponent_model, self.offer,
                                                     self._profile.getProfile().getDomain())
+            self.tft_bidding_strat = TitForTat(self._profile.getProfile(), self.opponent_model, self.offer)
             self.acceptance_strat = AcceptanceStrategy(self._profile.getProfile(), self.floor,
                                                        self._profile.getProfile().getDomain())
 
@@ -126,13 +129,27 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
     def getDescription(self) -> str:
         return "Template agent for Collaborative AI course"
 
+    # Return value which starts at offer and goes down in a boulware fashion
+    def _time_dependent(self, progress):
+        if (progress > Constants.boulware_time_limit and self.offer > Constants.floor):
+            return self.offer - (Constants.boulware_conceding_speed * progress)
+        else:
+            return self.offer
+
     # execute a turn
     def _my_turn(self):
+
+        self.offer = self._time_dependent(self._progress.get(0))
+
         # generate a bid for the opponent
-        bid = self.bidding_strat.find_bid(self._last_received_bid, self._opponent_bids, self._progress.get(0))
+        if (self._progress.get(0) < Constants.strategy_change_time):
+            bid = self.tradeoff_bidding_strat.find_bid(self.offer, self._last_received_bid)
+        else:
+            bid = self.tft_bidding_strat.find_bid(self.offer, self._opponent_bids, self._last_proposed_bid)
 
         # check if opponents bid is better than ours, if yes then accept, else offer our bid
         if self.acceptance_strat.is_good(self._last_received_bid, bid, self._progress.get(0)):
             self.getConnection().send(Accept(self._me, self._last_received_bid))
         else:
+            self._last_proposed_bid = bid
             self.getConnection().send(Offer(self._me, bid))

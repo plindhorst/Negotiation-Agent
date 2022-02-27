@@ -7,6 +7,8 @@ class Constants:
     tft_max_concession = 0.05
 
     boulware_time_limit = 0.2
-    boulware_conceding_speed = 0.03
+    boulware_conceding_speed = 0.001
     
     acceptance_time_limit = 0.8
+
+    strategy_change_time = 0.2
