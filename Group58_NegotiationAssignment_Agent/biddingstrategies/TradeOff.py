@@ -26,10 +26,11 @@ class TradeOff:
         return cast(LinearAdditive, self._profile)
 
     # Return set of iso curve bids.
-    def _iso_bids(self, n=50):
+    def _iso_bids(self, n=5):
         all_bids = AllBidsList(self._domain)
         bids = []
-        for i, bid in enumerate(all_bids):
+        i = 0
+        for bid in all_bids:
             if self._offer + self._tolerance > self._profile.getUtility(bid) > self._offer - self._tolerance:
                 bids.append(bid)
                 i += 1
@@ -74,12 +75,12 @@ class TradeOff:
         bids = self._iso_bids()
 
         if last_opponent_bid is None:
-            if bids.size() > 0:
-                return bids.get(0)
+            if len(bids) > 0:
+                return bids[0]
             else:
                 return self._getRandomBid()
 
-        best_bid = bids.get(0)
+        best_bid = bids[0]
         max_util = 0
         for bid in bids:
             util = self._opponent_model.getUtility(bid)
