@@ -1,3 +1,4 @@
+import decimal
 from copy import copy
 import logging
 import profile
@@ -30,9 +31,6 @@ from Group58_NegotiationAssignment_Agent.acceptancestrategies.AcceptanceStrategy
 from Group58_NegotiationAssignment_Agent.biddingstrategies.TitForTat import (
     TitForTat,
 )
-from Group58_NegotiationAssignment_Agent.opponentmodels.OpponentModel import (
-    OpponentModel,
-)
 
 
 class Group58_NegotiationAssignment_Agent(DefaultParty):
@@ -49,9 +47,10 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self._opponent_bids = Queue()
         self._last_proposed_bid = None
         self.opponent_model = None
-        self.alpha = 0.7
+        self.alpha = 0.85
         self.bidding_strat = None
         self.acceptance_strat = None
+        self.previous_progress = 0
 
     def notifyChange(self, info: Inform):
         """This is the entry point of all interaction with your agent after is has been initialised.
@@ -164,6 +163,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
     # execute a turn
     def _my_turn(self):
 
+        self._update_alpha()
         bid = self.bidding_strat.find_bid(
             self._opponent_bids,
             self._last_proposed_bid,
@@ -177,5 +177,13 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         else:
             self._last_proposed_bid = bid
             action = Offer(self._me, bid)
-
+        self.previous_progress = self._progress.get(0)
         self.getConnection().send(action)
+
+    # Update the floor and ceiling values over time
+    # Starting at 0.85 and ending at 0.65
+    # This makes 0.65 our reservation value
+    # Decreases linearly, amount of rounds shouldn't affect the linear rate
+    def _update_alpha(self):
+        self.alpha = self.alpha - 0.2 * (self._progress.get(0) - self.previous_progress)
+        self.bidding_strat.update_alpha(self.alpha)
