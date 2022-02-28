@@ -40,7 +40,7 @@ class TitForTat:
                 # first check if the opponent's bid is outside our reservation range
                 # if this is true, search for optimal bid within our range, else
                 # if the new offer has higher util than before
-                # opponent made a concession for my utility and we
+                # opponent made a concession for my utility function and we
                 # are reciprocating by also making a concession
                 if op_bid_new_util > self._ceiling:
                     interval_range = Interval(
@@ -85,6 +85,10 @@ class TitForTat:
                 return final_bid
 
     def _estimate_nash_point(self, bids, my_bid_util) -> Bid:
+        # This method tries to estimate the nash point by taking
+        # our previous bid (assumed to be best) and a bid out in the
+        # range that we generated and returns the one for which the
+        # nash product is highest. Resulting in a bid on the PF.
         best_bid_for_op = None
         max_nash = -1
         for bid in bids:

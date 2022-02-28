@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from runner.utils.plot_trace import plot_trace
 from runner.utils.runners import run_session
 
-DOMAIN_PATH = "runner/domains/domain00/"
+DOMAIN_PATH = "runner/domains/domain04/"
 
 # parse given flag
 parser = argparse.ArgumentParser()
@@ -30,13 +30,14 @@ if not os.path.exists("runner/results"):
 settings = {
     "agents": [
         "party.Group58_NegotiationAssignment_Agent",
-        #"party.Group58_NegotiationAssignment_Agent",
-        #"runner.agents.random_agent.random_agent.RandomAgent",
-        "runner.agents.boulware_agent.boulware_agent.BoulwareAgent",
-        #"runner.agents.conceder_agent.conceder_agent.ConcederAgent",
-        #"runner.agents.hardliner_agent.hardliner_agent.HardlinerAgent",
-        #"runner.agents.linear_agent.linear_agent.LinearAgent"
-        #"runner.agents.stupid_agent.stupid_agent.StupidAgent",
+        "toparty.TradeOffAgent",
+        # "party.Group58_NegotiationAssignment_Agent",
+        # "runner.agents.random_agent.random_agent.RandomAgent",
+        # "runner.agents.boulware_agent.boulware_agent.BoulwareAgent",
+        # "runner.agents.conceder_agent.conceder_agent.ConcederAgent",
+        # "runner.agents.hardliner_agent.hardliner_agent.HardlinerAgent",
+        # "runner.agents.linear_agent.linear_agent.LinearAgent"
+        # "runner.agents.stupid_agent.stupid_agent.StupidAgent",
     ],
     "profiles": [
         DOMAIN_PATH + "profileA.json",
