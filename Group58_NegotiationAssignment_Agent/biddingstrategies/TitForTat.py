@@ -16,7 +16,6 @@ class TitForTat:
     
     def find_bid(self, offer, op_bids: Queue, my_bid_last: Bid):
         self._offer = offer
-        print(self._offer)
         # Only apply strategy when there are more than 2 bids of opponent.
         if op_bids.qsize() == 2:
             # Measure the difference between utilities of the last two opponent bids.
@@ -43,9 +42,11 @@ class TitForTat:
 
                 bids = self._bidUtils.getBids(range)
                 # Prevent having empty bids list by expanding it slightly till we find bids
-                while bids.size() == 0:
-                    range.add(Interval(Decimal(-0.01), Decimal(0.01)))
-                    bids = self._bidUtils.getBids(range)
+                if bids.size() == 0:
+                    bids = self._bidUtils.getBids(Interval(
+                    Decimal(self._offer - Constants.tft_max_concession),
+                    Decimal(self._offer),
+                ))
 
                 # Find a bid that is best for the opponent using opponent model
                 return self._estimate_nash_point(bids, my_bid_last_util)

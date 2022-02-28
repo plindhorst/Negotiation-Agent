@@ -4,7 +4,7 @@ class Constants:
     
     iso_bids_tolerance = 0.05
 
-    tft_max_concession = 0.05
+    tft_max_concession = 0.1
 
     boulware_time_limit = 0.2
     boulware_conceding_speed = 0.001
