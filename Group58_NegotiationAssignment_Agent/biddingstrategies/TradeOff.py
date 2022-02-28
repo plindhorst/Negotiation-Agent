@@ -26,10 +26,16 @@ class TradeOff:
         return cast(LinearAdditive, self._profile)
 
     # Return set of iso curve bids.
-    def _iso_bids(self):
-        return self._bidUtils.getBids(
-            Interval(Decimal.from_float(self._offer - self._tolerance), Decimal.from_float(self._offer + self._tolerance))
-        )
+    def _iso_bids(self, n=50):
+        all_bids = AllBidsList(self._domain)
+        bids = []
+        for i, bid in enumerate(all_bids):
+            if self._offer + self._tolerance > self._profile.getUtility(bid) > self._offer - self._tolerance:
+                bids.append(bid)
+                i += 1
+            if i == n:
+                break
+        return bids
 
     # Return a random bid.
     def _getRandomBid(self):
@@ -42,7 +48,7 @@ class TradeOff:
         for issue in self._domain.getIssues():
             value = bid.getValue(issue)
             total_sim += self._opponent_model._getFraction(issue, value)
-        
+
         x = total_sim
 
         return x
@@ -57,7 +63,6 @@ class TradeOff:
             opponentUtilOneStepAgo = self._profile.getUtility(received_bids[len(received_bids) - 2])
             if (utilLast == utilThreeStepsAgo and opponentUtilLast <= opponentUtilOneStepAgo):
                 self._offer = boulware
-
 
     # Find a bid by using trade off strategy.
     def find_bid(self, opponent_model, last_opponent_bid, received_bids, sent_bids, boulware):
