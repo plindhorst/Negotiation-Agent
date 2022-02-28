@@ -29,7 +29,8 @@ if not os.path.exists("runner/results"):
 settings = {
     "agents": [
         "party.Group58_NegotiationAssignment_Agent",
-        "runner.agents.linear_agent.linear_agent.LinearAgent",
+        #"runner.agents.linear_agent.linear_agent.LinearAgent",
+        "runner.agents.boulware_agent.boulware_agent.BoulwareAgent"
     ],
     "profiles": [
         DOMAIN_PATH + "profileA.json",
