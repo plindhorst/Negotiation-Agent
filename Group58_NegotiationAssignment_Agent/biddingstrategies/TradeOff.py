@@ -50,17 +50,6 @@ class TradeOff:
         allBids = AllBidsList(self._domain)
         return allBids.get(randint(0, allBids.size() - 1))
 
-    # Calculate similarity based on opponent model.
-    def _similarity(self, bid):
-        total_sim = 0
-        for issue in self._domain.getIssues():
-            value = bid.getValue(issue)
-            total_sim += self._opponent_model._getFraction(issue, value)
-
-        x = total_sim
-
-        return x
-
     # Decrease our utility if we do not make any progress
     def _decrease_offer(self, received_bids, sent_bids, boulware):
         if (len(sent_bids) > 2):
