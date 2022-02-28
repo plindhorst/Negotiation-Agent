@@ -5,7 +5,7 @@ class Constants:
     iso_bids_tolerance = 0.05
 
     boulware_time_limit = 0.0
-    boulware_conceding_speed = 0.005
+    boulware_conceding_speed = 0.003
     
     acceptance_time_limit = 0.8
 
