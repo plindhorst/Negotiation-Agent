@@ -75,6 +75,8 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
                 info.getProfile().getURI(), self.getReporter()
             )
 
+            print("BID", self._profile.getProfile().getReservationBid())
+
             # BOA initializing
             self.opponent_model = FrequencyOpponentModel.create()
             self.opponent_model = self.opponent_model.With(

@@ -13,17 +13,21 @@ if not os.path.exists("results"):
 #   We need to specify a deadline of amount of rounds we can negotiate before we end without agreement
 tournament_settings = {
     "agents": [
-        "agents.boulware_agent.boulware_agent.BoulwareAgent",
-        "agents.conceder_agent.conceder_agent.ConcederAgent",
-        "agents.hardliner_agent.hardliner_agent.HardlinerAgent",
-        "agents.linear_agent.linear_agent.LinearAgent",
-        "agents.random_agent.random_agent.RandomAgent",
-        "agents.stupid_agent.stupid_agent.StupidAgent",
-        "agents.template_agent.template_agent.TemplateAgent",
+        "runner.agents.boulware_agent.boulware_agent.BoulwareAgent",
+        "party.Group58_NegotiationAssignment_Agent",
+        "runner.agents.conceder_agent.conceder_agent.ConcederAgent",
+        "runner.agents.linear_agent.linear_agent.LinearAgent",
+        "runner.agents.random_agent.random_agent.RandomAgent",
     ],
     "profile_sets": [
-        ["domains/domain00/profileA.json", "domains/domain00/profileB.json"],
-        ["domains/domain01/profileA.json", "domains/domain01/profileB.json"],
+        [
+            "runner/domains/domain03/profileA.json",
+            "runner/domains/domain03/profileB.json",
+        ],
+        [
+            "runner/domains/domain04/profileA.json",
+            "runner/domains/domain04/profileB.json",
+        ],
     ],
     "deadline_rounds": 200,
 }

@@ -68,7 +68,7 @@ class TitForTat:
 
     def _estimate_nash_point(self, bids, my_bid_util) -> Bid:
         best_bid_for_op = None
-        max_nash = 0
+        max_nash = -1
         for bid in bids:
             op_bid_util = self.opponent_model.getUtility(bid)
             print(op_bid_util)
