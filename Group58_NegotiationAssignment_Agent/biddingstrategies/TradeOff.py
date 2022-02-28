@@ -20,19 +20,26 @@ class TradeOff:
         self._issues = domain.getIssues()
         self._utilspace = self._setUtilSpace()
         self._bidUtils = BidsWithUtility.create(self._utilspace)
+        self._sorted_bids = self._sort_bids(AllBidsList(self._domain))
 
     # Set the util space.
     def _setUtilSpace(self) -> LinearAdditive:
         return cast(LinearAdditive, self._profile)
 
+    def _sort_bids(self, all_bids):
+        bids = []
+        for b in all_bids:
+            bid = {"bid": b, "utility": self._profile.getUtility(b)}
+            bids.append(bid)
+        return sorted(bids, key=lambda d: d['utility'], reverse=True)
+
     # Return set of iso curve bids.
     def _iso_bids(self, n=5):
-        all_bids = AllBidsList(self._domain)
         bids = []
         i = 0
-        for bid in all_bids:
-            if self._offer + self._tolerance > self._profile.getUtility(bid) > self._offer - self._tolerance:
-                bids.append(bid)
+        for bid in self._sorted_bids:
+            if self._offer + self._tolerance > bid["utility"] > self._offer - self._tolerance:
+                bids.append(bid["bid"])
                 i += 1
             if i == n:
                 break
