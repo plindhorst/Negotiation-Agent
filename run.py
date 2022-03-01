@@ -1,10 +1,12 @@
 import argparse
 import json
 import os
+import time
 
 from runner.utils.pareto import pareto_graph
 from runner.utils.plot_trace import plot_trace
 from runner.utils.runners import run_session
+from runner.utils.om_graph import om_graph
 
 DOMAIN_PATH = "runner/domains/"
 RESULTS_FOLDER = "runner/results"
@@ -48,6 +50,7 @@ else:
 averages = {"count": 0, "wins": 0, "num_offers": 0, "nash_product": 0, "social_welfare": 0, "agreement": 0}
 
 # start negotiations
+start = time.time()
 for profile_pair in profile_pairs:
     profile_name = profile_pair[0][:profile_pair[0].find("/")]
 
@@ -73,7 +76,7 @@ for profile_pair in profile_pairs:
         }
 
         # run a session and obtain results in dictionaries
-        results_trace, results_summary = run_session(settings)
+        results_trace, results_summary, opponent_model = run_session(settings)
 
         # save results
         results_summary['win'] = results_summary['result'] == "agreement" and results_summary[
@@ -91,9 +94,10 @@ for profile_pair in profile_pairs:
         if args.trace and os.path.isfile(DOMAIN_PATH + profile_name + "/specials.json"):
             pareto_graph(results_trace, DOMAIN_PATH + profile_name + "/specials.json",
                          results_folder + agent_name + ".png")
+            om_graph(opponent_model, results_folder + agent_name + "-om.png")
 
-            # plot trace to html file
-            plot_trace(results_trace, results_folder + agent_name + ".html")
+        # plot trace to html file
+        plot_trace(results_trace, results_folder + agent_name + ".html")
 
         # write results to file
         with open(results_folder + agent_name + ".json", "w") as f:
@@ -101,7 +105,11 @@ for profile_pair in profile_pairs:
         with open(results_folder + agent_name + ".json", "w") as f:
             f.write(json.dumps(results_summary, indent=2))
 
-print("\n\n\n### Results: ###\n\n* Negotiations: " + str(averages["count"]) + "\n* Wins: " + str(
+# print results
+minutes, seconds = divmod(divmod(time.time() - start, 3600)[1], 60)
+print("\n\n\n### Results (" + "{:0>2}:{:05.2f}".format(int(minutes),
+                                                       seconds) + "): ###\n\n* Negotiations: " + str(
+    averages["count"]) + "\n* Wins: " + str(
     round(averages["wins"] * 100 / averages["count"], 2)) + "%\n* Agreements: " + str(
     round(averages["agreement"] * 100 / averages["count"], 2)) + "%\n* Avg. Offers: " + str(
     round(averages["num_offers"] / averages["count"], 2)) + "\n* Avg. Social Welfare: " + str(

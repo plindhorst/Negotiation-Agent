@@ -51,7 +51,7 @@ def pareto_graph(results_trace, json_path, save_path):
 
     # Plot utilities
 
-    if len(my_offer_utilities) > 0:
+    if len(my_offer_utilities) > 1:
         poly(my_offer_utilities)
 
     # earlier bids are yellow
@@ -79,3 +79,4 @@ def pareto_graph(results_trace, json_path, save_path):
 
     plt.legend()
     plt.savefig(save_path, bbox_inches="tight")
+    plt.close(fig)
