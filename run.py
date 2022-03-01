@@ -31,7 +31,8 @@ if args.all:
         ("party.Group58_NegotiationAssignment_Agent", "runner.agents.linear_agent.linear_agent.LinearAgent"),
         ("party.Group58_NegotiationAssignment_Agent", "runner.agents.random_agent.random_agent.RandomAgent"),
         ("party.Group58_NegotiationAssignment_Agent", "runner.agents.stupid_agent.stupid_agent.StupidAgent"),
-        ("party.Group58_NegotiationAssignment_Agent", "runner.agents.template_agent.template_agent.TemplateAgent")]
+        ("party.Group58_NegotiationAssignment_Agent", "runner.agents.template_agent.template_agent.TemplateAgent"),
+        ("party.Group58_NegotiationAssignment_Agent", "party.Group58_NegotiationAssignment_Agent")]
     profile_pairs = [("domain00/profileA.json", "domain00/profileB.json"),
                      ("domain01/profileA.json", "domain01/profileB.json"),
                      ("domain02/profileA.json", "domain02/profileB.json"),
