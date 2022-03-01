@@ -1,0 +1,90 @@
+[
+  {
+    "agents": [
+      "party.Group58_NegotiationAssignment_Agent",
+      "toparty.TradeOffAgent"
+    ],
+    "profiles": [
+      "runner/domains/domain03/profileA.json",
+      "runner/domains/domain03/profileB.json"
+    ],
+    "deadline_rounds": 200
+  },
+  {
+    "agents": [
+      "toparty.TradeOffAgent",
+      "party.Group58_NegotiationAssignment_Agent"
+    ],
+    "profiles": [
+      "runner/domains/domain03/profileA.json",
+      "runner/domains/domain03/profileB.json"
+    ],
+    "deadline_rounds": 200
+  },
+  {
+    "agents": [
+      "party.Group58_NegotiationAssignment_Agent",
+      "toparty.TradeOffAgent"
+    ],
+    "profiles": [
+      "runner/domains/domain04/profileA.json",
+      "runner/domains/domain04/profileB.json"
+    ],
+    "deadline_rounds": 200
+  },
+  {
+    "agents": [
+      "toparty.TradeOffAgent",
+      "party.Group58_NegotiationAssignment_Agent"
+    ],
+    "profiles": [
+      "runner/domains/domain04/profileA.json",
+      "runner/domains/domain04/profileB.json"
+    ],
+    "deadline_rounds": 200
+  },
+  {
+    "agents": [
+      "party.Group58_NegotiationAssignment_Agent",
+      "toparty.TradeOffAgent"
+    ],
+    "profiles": [
+      "runner/domains/domain05/profileA.json",
+      "runner/domains/domain05/profileB.json"
+    ],
+    "deadline_rounds": 200
+  },
+  {
+    "agents": [
+      "toparty.TradeOffAgent",
+      "party.Group58_NegotiationAssignment_Agent"
+    ],
+    "profiles": [
+      "runner/domains/domain05/profileA.json",
+      "runner/domains/domain05/profileB.json"
+    ],
+    "deadline_rounds": 200
+  },
+  {
+    "agents": [
+      "party.Group58_NegotiationAssignment_Agent",
+      "toparty.TradeOffAgent"
+    ],
+    "profiles": [
+      "runner/domains/domain06/profileA.json",
+      "runner/domains/domain06/profileB.json"
+    ],
+    "deadline_rounds": 200
+  },
+  {
+    "agents": [
+      "toparty.TradeOffAgent",
+      "party.Group58_NegotiationAssignment_Agent"
+    ],
+    "profiles": [
+      "runner/domains/domain06/profileA.json",
+      "runner/domains/domain06/profileB.json"
+    ],
+    "deadline_rounds": 200
+  }
+]
