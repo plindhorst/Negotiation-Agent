@@ -62,7 +62,7 @@ def run_session(settings):
                     }
                 },
             ],
-            "deadline": {"DeadlineRounds": {"rounds": rounds, "durationms": 999}},
+            "deadline": {"DeadlineRounds": {"rounds": rounds, "durationms": 60000}},
         }
     }
 
