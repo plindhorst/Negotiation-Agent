@@ -16,6 +16,12 @@ def color_gradient(n):
     return colors_
 
 
+def poly(my_offer_utilities):
+    m, b = np.polyfit(my_offer_utilities[:, 0], my_offer_utilities[:, 1], 1)
+    plt.plot(my_offer_utilities[:, 0], m * my_offer_utilities[:, 0] + b, c='orange', label="Linear Regression",
+             zorder=10)
+
+
 def pareto_graph(results_trace, json_path, save_path):
     my_offer_utilities = []
     op_offer_utilities = []
@@ -24,8 +30,7 @@ def pareto_graph(results_trace, json_path, save_path):
     for action in results_trace["actions"]:
         if (
                 "Offer" in action
-                and action["Offer"]["actor"]
-                == "party_Group58_NegotiationAssignment_Agent_1"
+                and "party_Group58_NegotiationAssignment_Agent" in action["Offer"]["actor"]
         ):
             my_offer_utilities.append(list(action["Offer"]["utilities"].values()))
         elif "Accept" in action:
@@ -47,9 +52,8 @@ def pareto_graph(results_trace, json_path, save_path):
     # Plot utilities
 
     if len(my_offer_utilities) > 0:
-        m, b = np.polyfit(my_offer_utilities[:, 0], my_offer_utilities[:, 1], 1)
-        plt.plot(my_offer_utilities[:, 0], m * my_offer_utilities[:, 0] + b, c='orange', label="Linear Regression",
-                 zorder=10)
+        poly(my_offer_utilities)
+
     # earlier bids are yellow
     gradient = color_gradient(len(my_offer_utilities))
     for i, offer_utility in enumerate(my_offer_utilities):
@@ -57,7 +61,8 @@ def pareto_graph(results_trace, json_path, save_path):
         temp[i] = offer_utility[1]
         plt.scatter(offer_utility[0], offer_utility[1], c=gradient[i], s=20, zorder=10)
 
-    plt.plot(op_offer_utilities[:, 0], op_offer_utilities[:, 1], c='grey', label="Opponent trace")
+    if len(op_offer_utilities) > 0:
+        plt.plot(op_offer_utilities[:, 0], op_offer_utilities[:, 1], c='grey', label="Opponent trace")
     # Plot accepted bid
     if accepted_bid is not None:
         x, y = accepted_bid["utilities"].values()

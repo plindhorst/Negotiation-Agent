@@ -101,8 +101,6 @@ for profile_pair in profile_pairs:
         with open(results_folder + agent_name + ".json", "w") as f:
             f.write(json.dumps(results_summary, indent=2))
 
-print(averages)
-
 print("\n\n\n### Results: ###\n\n* Negotiations: " + str(averages["count"]) + "\n* Wins: " + str(
     round(averages["wins"] * 100 / averages["count"], 2)) + "%\n* Agreements: " + str(
     round(averages["agreement"] * 100 / averages["count"], 2)) + "%\n* Avg. Offers: " + str(
