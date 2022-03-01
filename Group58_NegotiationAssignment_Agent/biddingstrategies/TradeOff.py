@@ -18,26 +18,37 @@ class TradeOff:
         self._issues = domain.getIssues()
         self._utilspace = self._set_util_space()
         self._bidUtils = BidsWithUtility.create(self._utilspace)
-        self._sorted_bids = self._sort_bids(AllBidsList(self._domain))
+        # self._sorted_bids = self._sort_bids(AllBidsList(self._domain))
 
     # set the util space
     def _set_util_space(self) -> LinearAdditive:
         return cast(LinearAdditive, self._profile)
 
-    def _sort_bids(self, all_bids):
-        bids = []
-        for b in all_bids:
-            bid = {"bid": b, "utility": self._profile.getUtility(b)}
-            bids.append(bid)
-        return sorted(bids, key=lambda d: d['utility'], reverse=True)
+    # def _sort_bids(self, all_bids):
+    #     bids = []
+    #     for b in all_bids:
+    #         bid = {"bid": b, "utility": self._profile.getUtility(b)}
+    #         bids.append(bid)
+    #     return sorted(bids, key=lambda d: d['utility'], reverse=True)
 
     # return set of iso curve bids
+    # def _iso_bids(self, n=5):
+    #     bids = []
+    #     i = 0
+    #     for bid in self._sorted_bids:
+    #         if self._offer + self._tolerance > bid["utility"] > self._offer - self._tolerance:
+    #             bids.append(bid["bid"])
+    #             i += 1
+    #         if i == n:
+    #             break
+    #     return bids
+
     def _iso_bids(self, n=5):
         bids = []
         i = 0
-        for bid in self._sorted_bids:
-            if self._offer + self._tolerance > bid["utility"] > self._offer - self._tolerance:
-                bids.append(bid["bid"])
+        for bid in AllBidsList(self._domain):
+            if self._offer + self._tolerance > self._profile.getUtility(bid) > self._offer - self._tolerance:
+                bids.append(bid)
                 i += 1
             if i == n:
                 break
@@ -72,6 +83,9 @@ class TradeOff:
                 return bids[0]
             else:
                 return self._get_random_bid()
+
+        if len(bids) == 0:
+            return self._get_random_bid()
 
         best_bid = bids[0]
         max_util = 0
