@@ -62,7 +62,7 @@ def run_session(settings):
                     }
                 },
             ],
-            "deadline": {"DeadlineRounds": {"rounds": rounds, "durationms": 999}},
+            "deadline": {"DeadlineRounds": {"rounds": rounds, "durationms": 60000}},
         }
     }
 
@@ -80,9 +80,9 @@ def run_session(settings):
     results_dict = ObjectMapper().toJson(results_class)
 
     # add utilities to the results and create a summary
-    results_trace, results_summary = process_results(results_class, results_dict)
+    results_trace, results_summary, opponent_model = process_results(results_class, results_dict)
 
-    return results_trace, results_summary
+    return results_trace, results_summary, opponent_model
 
 
 def run_tournament(tournament_settings: dict) -> Tuple[list, list]:
@@ -187,7 +187,21 @@ def process_results(results_class, results_dict):
         results_summary["social_welfare"] = 0
         results_summary["result"] = "ERROR"
 
-    return results_dict, results_summary
+    # combine expected model with real values
+    opponent_model = []
+    for action in results_dict["actions"]:
+        if "Offer" in action and "party_Group58_NegotiationAssignment_Agent" in action["Offer"]["actor"]:
+            offer = {"issues": action["Offer"]["bid"]["issuevalues"],
+                     "utility": action["Offer"]["utilities"][list(action["Offer"]["utilities"])[1]]}
+
+            opponent_model.append(offer)
+
+    with open("OpponentModel.log") as file:
+        for i, line in enumerate(file):
+            if i < len(opponent_model):
+                opponent_model[i]["expected_utility"] = float(line.rstrip())
+
+    return results_dict, results_summary, opponent_model
 
 
 def get_utility_function(profile_uri) -> LinearAdditiveUtilitySpace:
