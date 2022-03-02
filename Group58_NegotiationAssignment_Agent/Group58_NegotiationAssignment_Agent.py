@@ -12,7 +12,6 @@ from geniusweb.inform.Settings import Settings
 from geniusweb.inform.YourTurn import YourTurn
 from geniusweb.party.Capabilities import Capabilities
 from geniusweb.party.DefaultParty import DefaultParty
-from geniusweb.opponentmodel.FrequencyOpponentModel import FrequencyOpponentModel
 from geniusweb.profileconnection.ProfileConnectionFactory import (
     ProfileConnectionFactory,
 )
@@ -20,6 +19,7 @@ from geniusweb.profileconnection.ProfileConnectionFactory import (
 from Group58_NegotiationAssignment_Agent.Constants import Constants
 from Group58_NegotiationAssignment_Agent.acceptancestrategies.AcceptanceStrategy import AcceptanceStrategy
 from Group58_NegotiationAssignment_Agent.biddingstrategies.TradeOff import TradeOff
+from Group58_NegotiationAssignment_Agent.opponentmodels.OpponentModel import OpponentModel
 
 
 class Group58_NegotiationAssignment_Agent(DefaultParty):
@@ -64,7 +64,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             )
 
             # BOA initializing
-            self.opponent_model = FrequencyOpponentModel.create().With(self._profile.getProfile().getDomain(), None)
+            self.opponent_model = OpponentModel(self._profile.getProfile().getDomain())
             open('OpponentModel.log', 'w').close()
             self.bidding_strat = TradeOff(self._profile.getProfile(), self.opponent_model, self.offer,
                                           self._profile.getProfile().getDomain())
@@ -79,7 +79,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             if isinstance(action, Offer) and action.getActor().getName() != self._me.getName():
                 self._last_received_bid = cast(Offer, action).getBid()
                 self._received_bids.append(self._last_received_bid)
-                self.opponent_model = self.opponent_model.WithAction(action, self._progress)
+                self.opponent_model.update_frequencies(self._last_received_bid)
         # YourTurn notifies you that it is your turn to act
         elif isinstance(info, YourTurn):
             # execute a turn
@@ -139,7 +139,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         else:
             # save expected utility for OM graph
             with open("OpponentModel.log", "a") as text_file:
-                text_file.write(str(self.opponent_model.getUtility(bid)) + "\n")
+                text_file.write(str(self.opponent_model.utility(bid)) + "\n")
 
             self.getConnection().send(Offer(self._me, bid))
             self._sent_bids.append(bid)
