@@ -88,6 +88,7 @@ for profile_pair in profile_pairs:
             averages["wins"] += 1
         averages["num_offers"] += results_summary["num_offers"]
         averages["social_welfare"] += results_summary["social_welfare"]
+        averages["nash_product"] += results_summary["nash_product"]
         if results_summary['result'] == "agreement":
             averages["agreement"] += 1
 
@@ -114,4 +115,6 @@ print("\n\n\n### Results (" + "{:0>2}:{:05.2f}".format(int(minutes),
     round(averages["wins"] * 100 / averages["count"], 2)) + "%\n* Agreements: " + str(
     round(averages["agreement"] * 100 / averages["count"], 2)) + "%\n* Avg. Offers: " + str(
     round(averages["num_offers"] / averages["count"], 2)) + "\n* Avg. Social Welfare: " + str(
-    round(averages["social_welfare"] / averages["count"], 2)))
+    round(averages["social_welfare"] / averages["count"], 2)) + "\n* Avg. Nash Product: " + str(
+    round(averages["nash_product"] / averages["count"], 2)))
+

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from random import randint
 from typing import cast
 
@@ -79,7 +80,7 @@ class TradeOff:
         best_bid = bids[0]
         max_util = 0
         for bid in bids:
-            util = self._opponent_model.getUtility(bid)
+            util = self._opponent_model.getUtility(bid) * Decimal(Constants.opponent_model_offset)
             if util > max_util:
                 best_bid = bid
                 max_util = util
