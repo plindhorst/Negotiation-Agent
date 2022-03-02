@@ -1,3 +1,6 @@
+from Group58_NegotiationAssignment_Agent.Constants import Constants
+
+
 class OpponentModel:
     def __init__(self, domain):
         self._domain = domain
@@ -46,4 +49,4 @@ class OpponentModel:
 
         u /= len(self._domain.getIssues())
 
-        return u
+        return u * Constants.opponent_model_offset
