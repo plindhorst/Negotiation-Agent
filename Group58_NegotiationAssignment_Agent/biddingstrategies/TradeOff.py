@@ -51,7 +51,7 @@ class TradeOff:
 
     # decrease our utility if we do not make any progress
     def _decrease_offer(self, received_bids, sent_bids, boulware):
-        if len(sent_bids) > 2:
+        if len(sent_bids) > 3:
             utilLast = self._profile.getUtility(sent_bids[len(sent_bids) - 1])
             utilThreeStepsAgo = self._profile.getUtility(sent_bids[len(sent_bids) - 4])
             opponentUtilLast = self._profile.getUtility(received_bids[len(received_bids) - 1])
