@@ -3,8 +3,6 @@ from random import randint
 from typing import cast
 
 from geniusweb.bidspace.AllBidsList import AllBidsList
-from geniusweb.bidspace.BidsWithUtility import BidsWithUtility
-from geniusweb.profile.utilityspace.LinearAdditive import LinearAdditive
 
 from Group58_NegotiationAssignment_Agent.Constants import Constants
 
@@ -17,13 +15,7 @@ class TradeOff:
         self._tolerance = Constants.iso_bids_tolerance
         self._domain = domain
         self._issues = domain.getIssues()
-        self._utilspace = self._set_util_space()
-        self._bidUtils = BidsWithUtility.create(self._utilspace)
         self._sorted_bids = self._sort_bids(AllBidsList(self._domain))
-
-    # set the util space
-    def _set_util_space(self) -> LinearAdditive:
-        return cast(LinearAdditive, self._profile)
 
     def _sort_bids(self, all_bids):
         bids = []
