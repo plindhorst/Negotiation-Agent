@@ -53,7 +53,7 @@ class TradeOff:
     def _decrease_offer(self, received_bids, sent_bids, boulware):
         if len(sent_bids) > 2:
             utilLast = self._profile.getUtility(sent_bids[len(sent_bids) - 1])
-            utilThreeStepsAgo = self._profile.getUtility(sent_bids[len(sent_bids) - 3])
+            utilThreeStepsAgo = self._profile.getUtility(sent_bids[len(sent_bids) - 4])
             opponentUtilLast = self._profile.getUtility(received_bids[len(received_bids) - 1])
             opponentUtilOneStepAgo = self._profile.getUtility(received_bids[len(received_bids) - 2])
             if utilLast == utilThreeStepsAgo and opponentUtilLast <= opponentUtilOneStepAgo:
