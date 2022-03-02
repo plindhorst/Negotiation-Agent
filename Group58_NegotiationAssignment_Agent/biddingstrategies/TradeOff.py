@@ -49,7 +49,7 @@ class TradeOff:
             opponentUtilLast = self._profile.getUtility(received_bids[len(received_bids) - 1])
             opponentUtilOneStepAgo = self._profile.getUtility(received_bids[len(received_bids) - 2])
             if utilLast == utilThreeStepsAgo and opponentUtilLast <= opponentUtilOneStepAgo:
-                self._offer = self._offer - Constants.boulware_conceding_speed
+                self._offer = boulware
 
     # find a bid by using trade off strategy
     def find_bid(self, opponent_model, last_opponent_bid, received_bids, sent_bids, boulware):
