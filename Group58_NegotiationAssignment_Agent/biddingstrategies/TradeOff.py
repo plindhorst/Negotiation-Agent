@@ -1,67 +1,82 @@
+from decimal import Decimal
 from random import randint
+from typing import cast
 
 from geniusweb.bidspace.AllBidsList import AllBidsList
-from geniusweb.issuevalue.Bid import Bid
+
+from Group58_NegotiationAssignment_Agent.Constants import Constants
 
 
 class TradeOff:
-    def __init__(self, profile, opponent_model, alpha, domain):
+    def __init__(self, profile, opponent_model, offer, domain):
         self._profile = profile
         self._opponent_model = opponent_model
-        self._alpha = alpha
+        self._offer = offer
+        self._tolerance = Constants.iso_bids_tolerance
         self._domain = domain
         self._issues = domain.getIssues()
+        self._sorted_bids = self._sort_bids(AllBidsList(self._domain))
 
-    def _random_bid(self):
+    # sort bids on Utility descending
+    def _sort_bids(self, all_bids):
+        bids = []
+        for b in all_bids:
+            bid = {"bid": b, "utility": self._profile.getUtility(b)}
+            bids.append(bid)
+        return sorted(bids, key=lambda d: d['utility'], reverse=True)
+
+    # return set of iso curve bids
+    def _iso_bids(self, n=5):
+        bids = []
+        i = 0
+        for bid in self._sorted_bids:
+            if self._offer + self._tolerance > bid["utility"] > self._offer - self._tolerance:
+                bids.append(bid["bid"])
+                i += 1
+            if i == n:
+                break
+        return bids
+
+    # return a random bid
+    def _get_random_bid(self):
         all_bids = AllBidsList(self._domain)
-        for _ in range(200):
-            bid = all_bids.get(randint(0, all_bids.size() - 1))
-            if self._profile.getUtility(bid) >= self._alpha:
-                return bid
+        return all_bids.get(randint(0, all_bids.size() - 1))
 
-    # Find a bid by using trade off strategy.
-    def find_bid(self, last_opponent_bid):
-        # TODO: fix
-        # if last_opponent_bid is not None:
-        #     # make dict for new bid.
-        #     values = {}
-        #
-        #     # for each issue, get value from domain and value from opponent's bid
-        #     for issue in self._issues:
-        #         opponent_value = self._opponent_model.get_best_value(issue)
-        #         values = self._domain.getValues(issue)
-        #         values[issue] = _find_trade_off(issue, values, opponent_value, last_opponent_bid)
-        #
-        #     return Bid(values)
-        # else:
-        return self._random_bid()
+    # decrease our utility if we do not make any progress
+    def _decrease_offer(self, received_bids, sent_bids, boulware):
+        if len(sent_bids) > 3:
+            utilLast = self._profile.getUtility(sent_bids[len(sent_bids) - 1])
+            utilThreeStepsAgo = self._profile.getUtility(sent_bids[len(sent_bids) - 4])
+            opponentUtilLast = self._profile.getUtility(received_bids[len(received_bids) - 1])
+            opponentUtilOneStepAgo = self._profile.getUtility(received_bids[len(received_bids) - 2])
+            if utilLast == utilThreeStepsAgo and opponentUtilLast <= opponentUtilOneStepAgo:
+                self._offer = boulware
 
+    # find a bid by using trade off strategy
+    def find_bid(self, opponent_model, last_opponent_bid, received_bids, sent_bids, boulware):
+        self._opponent_model = opponent_model
 
-# Find trade off between own preference and other.
-def _find_trade_off(issue, values, opponent_value, last_opponent_bid):
-    last_bid_value = last_opponent_bid.getValue(issue)
+        self._decrease_offer(received_bids, sent_bids, boulware)
 
-    # now we have values, last_value and opponentValue
-    # for example values are [0, 1, 2, 3, 4, 5],
-    # our last value was 0 (highest utility for us)
-    # their last value was 5 (highest utility for them)
-    # we want to concede towards that (so bid for 1,2,3 or 4)
-    # however when we concede on the issue of most interest to other
-    # we want to gain on a issue with most interest to us.
+        # generate n bids
+        bids = self._iso_bids()
 
-    # stupid code:
-    position_1 = -1
-    position_2 = -1
-    for i in range(values.size()):
-        if values.get(i) == last_bid_value:
-            position_1 = i
-        if values.get(i) == opponent_value:
-            position_2 = i
+        if last_opponent_bid is None:
+            if len(bids) > 0:
+                return bids[0]
+            else:
+                return self._get_random_bid()
 
-    # Case we can concede a step
-    if position_1 > position_2:
-        return values.get(position_1 - 1)
-    if position_1 < position_2:
-        return values.get(position_1 + 1)
-    else:
-        return last_bid_value
+        if len(bids) == 0:
+            return self._get_random_bid()
+
+        # choose bid with maximum utility for opponent
+        best_bid = bids[0]
+        max_util = 0
+        for bid in bids:
+            util = self._opponent_model.utility(bid)
+            if util > max_util:
+                best_bid = bid
+                max_util = util
+
+        return best_bid

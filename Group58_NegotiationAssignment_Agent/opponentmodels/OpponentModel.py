@@ -1,10 +1,11 @@
+from Group58_NegotiationAssignment_Agent.Constants import Constants
+
+
 class OpponentModel:
     def __init__(self, domain):
         self._domain = domain
         self._freqs = {}
-        open('OpponentModel.log', 'w').close()
         for issue in self._domain.getIssues():
-
             self._freqs[issue] = {}
 
     # Update value frequency for new incoming bid
@@ -16,28 +17,6 @@ class OpponentModel:
                     self._freqs[issue][value] += 1
                 else:
                     self._freqs[issue][value] = 1
-
-    def get_frequency(self, issue, value):
-        if value not in self._freqs[issue]:
-            return 0
-
-        sum = 0
-        for val in self._freqs[issue]:
-            sum += self._freqs[issue][val]
-        
-        return self._freqs[issue][value] / sum
-
-    # get value for issue with highest frequency
-    def get_best_value(self, issue):
-        max_f = 0
-        value = 0
-
-        for val in self._freqs[issue]:
-            if self._freqs[issue][val] > max_f:
-                max_f = self._freqs[issue][val]
-                value = val
-
-        return value
 
     # returns normalized weights depending on importance of the issues
     # along with the largest value freq for each issue
@@ -70,7 +49,4 @@ class OpponentModel:
 
         u /= len(self._domain.getIssues())
 
-        # save utilities in file for future logging
-        with open("OpponentModel.log", "a") as text_file:
-            text_file.write(str(u) + "\n")
-        return u
+        return u * Constants.opponent_model_offset

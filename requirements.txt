@@ -1,2 +1,4 @@
 https://tracinsy.ewi.tudelft.nl/pubtrac/GeniusWebPython/export/83/geniuswebcore/dist/geniusweb-1.1.4.tar.gz
 plotly==5.1.0
+matplotlib
+numpy

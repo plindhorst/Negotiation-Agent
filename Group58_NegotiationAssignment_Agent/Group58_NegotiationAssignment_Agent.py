@@ -1,30 +1,25 @@
-from copy import copy
 import logging
-import profile
-from random import randint
-from typing import Dict, cast
+
+from typing import cast
 
 from geniusweb.actions.Accept import Accept
 from geniusweb.actions.Action import Action
 from geniusweb.actions.Offer import Offer
-from geniusweb.bidspace.AllBidsList import AllBidsList
 from geniusweb.inform.ActionDone import ActionDone
 from geniusweb.inform.Finished import Finished
 from geniusweb.inform.Inform import Inform
 from geniusweb.inform.Settings import Settings
 from geniusweb.inform.YourTurn import YourTurn
-from geniusweb.issuevalue.Bid import Bid
-from geniusweb.issuevalue.Value import Value
 from geniusweb.party.Capabilities import Capabilities
 from geniusweb.party.DefaultParty import DefaultParty
 from geniusweb.profileconnection.ProfileConnectionFactory import (
     ProfileConnectionFactory,
 )
 
-from Group58_NegotiationAssignment_Agent.opponentmodels.OpponentModel import OpponentModel
-
+from Group58_NegotiationAssignment_Agent.Constants import Constants
 from Group58_NegotiationAssignment_Agent.acceptancestrategies.AcceptanceStrategy import AcceptanceStrategy
-from Group58_NegotiationAssignment_Agent.biddingstrategies.TradeOffSimilarity import TradeOffSimilarity
+from Group58_NegotiationAssignment_Agent.biddingstrategies.TradeOff import TradeOff
+from Group58_NegotiationAssignment_Agent.opponentmodels.OpponentModel import OpponentModel
 
 
 class Group58_NegotiationAssignment_Agent(DefaultParty):
@@ -38,9 +33,12 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
         self.getReporter().log(logging.INFO, "party is initialized")
         self._profile = None
         self._last_received_bid = None
-        self._last_sent_bid = None
+        self._received_bids = []
+        self._sent_bids = []
         self.opponent_model = None
-        self.alpha = 0.7
+        self.offer = Constants.offer
+        self.floor = Constants.floor
+        self.boulware = self.offer
         self.bidding_strat = None
         self.acceptance_strat = None
 
@@ -67,9 +65,10 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
             # BOA initializing
             self.opponent_model = OpponentModel(self._profile.getProfile().getDomain())
-            self.bidding_strat = TradeOffSimilarity(self._profile.getProfile(), self.opponent_model, self.alpha,
-                                                    self._profile.getProfile().getDomain())
-            self.acceptance_strat = AcceptanceStrategy(self._profile.getProfile(), self.alpha,
+            open('OpponentModel.log', 'w').close()
+            self.bidding_strat = TradeOff(self._profile.getProfile(), self.opponent_model, self.offer,
+                                          self._profile.getProfile().getDomain())
+            self.acceptance_strat = AcceptanceStrategy(self._profile.getProfile(), self.floor,
                                                        self._profile.getProfile().getDomain())
 
         # ActionDone is an action send by an opponent (an offer or an accept)
@@ -77,8 +76,10 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
             action: Action = cast(ActionDone, info).getAction()
 
             # if it is an offer, set the last received bid
-            if isinstance(action, Offer):
+            if isinstance(action, Offer) and action.getActor().getName() != self._me.getName():
                 self._last_received_bid = cast(Offer, action).getBid()
+                self._received_bids.append(self._last_received_bid)
+                self.opponent_model.update_frequencies(self._last_received_bid)
         # YourTurn notifies you that it is your turn to act
         elif isinstance(info, YourTurn):
             # execute a turn
@@ -119,20 +120,27 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
 
     # give a description of your agent
     def getDescription(self) -> str:
-        return "Template agent for Collaborative AI course"
+        return "Trade-Off/TitForTat hyrbrid negotiation agent"
+
+    # Generate a variable that follows a boulware curve
+    def TimeDependent(self):
+        if self._progress.get(0) > Constants.boulware_time_limit and self.offer > Constants.floor:
+            self.boulware = self.boulware - (Constants.boulware_conceding_speed * self._progress.get(0))
 
     # execute a turn
     def _my_turn(self):
-
-        # save opponents bid into opponentmodel
-        self.opponent_model.update_frequencies(self._last_received_bid)
-
+        self.TimeDependent()
         # generate a bid for the opponent
-        bid = self.bidding_strat.find_bid(self._last_received_bid)
+        bid = self.bidding_strat.find_bid(self.opponent_model, self._last_received_bid, self._received_bids,
+                                          self._sent_bids, self.boulware)
 
         # check if opponents bid is better than ours, if yes then accept, else offer our bid
         if self.acceptance_strat.is_good(self._last_received_bid, bid, self._progress.get(0)):
             self.getConnection().send(Accept(self._me, self._last_received_bid))
         else:
-            self.opponent_model.utility(bid) # save opponent utility
+            # save expected utility for OM graph
+            with open("OpponentModel.log", "a") as text_file:
+                text_file.write(str(self.opponent_model.utility(bid)) + "\n")
+
             self.getConnection().send(Offer(self._me, bid))
+            self._sent_bids.append(bid)
