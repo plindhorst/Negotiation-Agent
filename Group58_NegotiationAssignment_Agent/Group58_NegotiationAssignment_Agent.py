@@ -122,6 +122,7 @@ class Group58_NegotiationAssignment_Agent(DefaultParty):
     def getDescription(self) -> str:
         return "Trade-Off/TitForTat hyrbrid negotiation agent"
 
+    # Generate a variable that follows a boulware curve
     def TimeDependent(self):
         if self._progress.get(0) > Constants.boulware_time_limit and self.offer > Constants.floor:
             self.boulware = self.boulware - (Constants.boulware_conceding_speed * self._progress.get(0))

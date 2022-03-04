@@ -17,6 +17,7 @@ class TradeOff:
         self._issues = domain.getIssues()
         self._sorted_bids = self._sort_bids(AllBidsList(self._domain))
 
+    # sort bids on Utility descending
     def _sort_bids(self, all_bids):
         bids = []
         for b in all_bids:
@@ -69,6 +70,7 @@ class TradeOff:
         if len(bids) == 0:
             return self._get_random_bid()
 
+        # choose bid with maximum utility for opponent
         best_bid = bids[0]
         max_util = 0
         for bid in bids:
