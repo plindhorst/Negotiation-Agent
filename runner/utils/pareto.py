@@ -42,9 +42,11 @@ def pareto_graph(results_trace, json_path, save_path):
     op_offer_utilities = np.array(op_offer_utilities)
 
     # figure settings
+    font = {"size": 22}
     fig = plt.gcf()
     fig.clear()
     fig.set_size_inches(10, 10)
+    plt.rc("font", **font)
     plt.xlabel("Utility me")
     plt.ylabel("Utility opponent")
     plt.title("Negotiation trace with Pareto Frontier")
